@@ -1,13 +1,15 @@
-import express, { Request, Response, NextFunction } from "express";
+/* eslint-disable no-console */
+import express, { NextFunction, Request, Response } from "express";
 import http from "http";
 import { Server } from "socket.io";
 import dotenv from "dotenv";
 import { dbConnection } from "@database/connection";
 import { databaseSync } from "@database/models";
-import { userRoute } from "@routes";
-import { Messages } from "@messages";
+import userRoute from "@routes";
+import Messages from "@messages";
 
-dotenv.config({ path: ".env" });
+const NODE_ENV = process.env.NODE_ENV || "development";
+dotenv.config({ path: `.env.${NODE_ENV}` });
 
 const app = express();
 const server = http.createServer(app);
@@ -28,14 +30,16 @@ server.listen(port, () => {
   console.log(Messages.server + port);
 });
 
-(async function () {
+async function dbConfig() {
   await dbConnection();
   await databaseSync();
-})();
+}
+dbConfig();
 
-app.use((error: any,req: Request, res: Response,next:NextFunction) => {
-  return res.json({
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+app.use((error: any, req: Request, res: Response, next: NextFunction) =>
+  res.json({
     status: error.statusCode || 500,
     message: error.message || Messages.serverError,
-  });
-});
+  }),
+);

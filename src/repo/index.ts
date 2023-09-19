@@ -1,2 +1,3 @@
-export { UserRepo } from "./users.repo";
+import UserRepo from "./users.repo";
 
+export default UserRepo;

@@ -1,2 +1,3 @@
-export { userRoute } from "./user.routes";
+import userRoute from "./user.routes";
 
+export default userRoute;

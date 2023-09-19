@@ -1,9 +1,15 @@
-export interface UserInterface {
-  id?: string;
+interface UserInterface {
+  id: string;
   email: string;
   password: string;
-  profilePicture?: string;
+  confirmPassword: string;
+  profilePicture: string;
   firstName: string;
   lastName: string;
   role: string;
+  createdAt: Date;
+  updatedAt: Date;
+  deletedAt: Date | null;
 }
+
+export default UserInterface;

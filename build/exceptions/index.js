@@ -1,6 +1,5 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.BadRequestExceptionError = void 0;
 class BadRequestExceptionError extends Error {
     message;
     statusCode;
@@ -10,4 +9,4 @@ class BadRequestExceptionError extends Error {
         this.statusCode = 400;
     }
 }
-exports.BadRequestExceptionError = BadRequestExceptionError;
+exports.default = BadRequestExceptionError;

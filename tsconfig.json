@@ -18,7 +18,8 @@
       "@messages" : ["messages"],
       "@repo" : ["repo"],
       "@routes" : ["routes"],
-      "@service" : ["service"]
+      "@service" : ["service"],
+      "@utils" : ["utils"]
     }
   },
   "include": ["src/**/*.ts"]
