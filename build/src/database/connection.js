@@ -12,7 +12,7 @@ const database = config_1.default.database;
 const username = config_1.default.username;
 const password = config_1.default.password;
 const host = config_1.default.host;
-const dialect = config_1.default.dialect;
+const dialect = "postgres";
 exports.sequelize = new sequelize_1.Sequelize(database, username, password, {
     host,
     dialect,

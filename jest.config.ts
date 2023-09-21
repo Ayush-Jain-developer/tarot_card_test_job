@@ -8,7 +8,7 @@ const config: Config = {
   testEnvironment: "node",
   collectCoverage: true,
   moduleNameMapper: pathsToModuleNameMapper(compilerOptions.paths, {
-    prefix: "<rootDir>/",
+    prefix: "<rootDir>/src",
   }),
   collectCoverageFrom: ["src/**/*.ts"],
   coverageProvider: "v8",

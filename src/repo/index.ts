@@ -1,3 +1,4 @@
 import UserRepo from "./users.repo";
+import ReaderBioRepo from "./readerProfile.repo";
 
-export default UserRepo;
+export { UserRepo, ReaderBioRepo };

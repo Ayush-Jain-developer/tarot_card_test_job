@@ -11,7 +11,9 @@ const secretKey = process.env.SECRET_KEY as string;
 
 class Jwt {
   static createToken(payLoad: Omit<UserInterface, "confirmPassword">) {
-    return jwt.sign(payLoad, secretKey);
+    return jwt.sign(payLoad, secretKey, {
+      expiresIn: "1m",
+    });
   }
 
   static verifyToken(req: Request, res: Response, next: NextFunction) {
@@ -23,6 +25,9 @@ class Jwt {
 
     jwt.verify(token, secretKey, (err, decoded) => {
       if (err) {
+        if (err.name === "TokenExpiredError") {
+          return next(new UnauthorizedExceptionError(Messages.tokenExpired));
+        }
         return next(new UnauthorizedExceptionError(Messages.invalidToken));
       }
       const result = decoded as jwt.JwtPayload;

@@ -1,6 +1,6 @@
 interface ReaderBioInterface {
   id: string;
-  bio: Text;
+  bio: string;
   specialities: Array<string>;
   availability: boolean;
   createdAt?: Date;

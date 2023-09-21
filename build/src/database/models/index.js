@@ -12,7 +12,7 @@ const reader_bio_1 = __importDefault(require("@database/models/reader_bio"));
 exports.models = { user: user_1.default, readerBio: reader_bio_1.default };
 const databaseSync = async () => {
     try {
-        await connection_1.sequelize.sync({ force: true });
+        await connection_1.sequelize.sync({ force: false });
         console.log(_messages_1.default.dbSync);
     }
     catch (syncError) {

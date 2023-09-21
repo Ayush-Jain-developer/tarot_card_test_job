@@ -4,11 +4,12 @@
     "module": "commonjs",
     "outDir": "./build",
     "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
     "strict": true,
     "noImplicitAny": true,
     "skipLibCheck": true,
+    "moduleResolution":"node",
     "baseUrl": "./src",
+    "resolveJsonModule": true,
     "paths": {
       "@controller" : ["controller"],
       "@database/*" : ["database/*"],
@@ -19,8 +20,8 @@
       "@repo" : ["repo"],
       "@routes" : ["routes"],
       "@service" : ["service"],
-      "@utils" : ["utils"],
+      "@utils" : ["utils"]
     }
   },
-  "include": ["src/**/*.ts", "test/**/*.ts", "./.eslintrc.js"]
+  "include": ["src/**/*.ts", "test/**/*.ts"]
 }

@@ -12,7 +12,9 @@ dotenv_1.default.config({ path: `.env.${NODE_ENV}` });
 const secretKey = process.env.SECRET_KEY;
 class Jwt {
     static createToken(payLoad) {
-        return jsonwebtoken_1.default.sign(payLoad, secretKey);
+        return jsonwebtoken_1.default.sign(payLoad, secretKey, {
+            expiresIn: "1m",
+        });
     }
     static verifyToken(req, res, next) {
         const token = req.header("Authorization");
@@ -21,6 +23,9 @@ class Jwt {
         }
         jsonwebtoken_1.default.verify(token, secretKey, (err, decoded) => {
             if (err) {
+                if (err.name === "TokenExpiredError") {
+                    return next(new _exceptions_1.UnauthorizedExceptionError(_messages_1.default.tokenExpired));
+                }
                 return next(new _exceptions_1.UnauthorizedExceptionError(_messages_1.default.invalidToken));
             }
             const result = decoded;

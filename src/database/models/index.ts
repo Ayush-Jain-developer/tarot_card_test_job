@@ -8,7 +8,7 @@ export const models = { user, readerBio };
 
 export const databaseSync = async () => {
   try {
-    await sequelize.sync({ force: true });
+    await sequelize.sync({ force: false });
     console.log(Messages.dbSync);
   } catch (syncError: any) {
     console.log(Messages.dbSyncFail, syncError.message || syncError);

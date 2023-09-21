@@ -7,10 +7,9 @@ import {
 } from "@exceptions";
 import { ValidateFields } from "@helper";
 import bcrypt from "bcrypt";
-import UserRepo from "@repo";
+import { UserRepo, ReaderBioRepo } from "@repo";
 import Messages from "@messages";
 import Jwt from "@utils";
-import ReaderBioRepo from "repo/readerProfile.repo";
 
 class UserService {
   static async signUp(data: UserInterface) {

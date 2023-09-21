@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-import { Dialect, Sequelize } from "sequelize";
+import { Sequelize } from "sequelize";
 import config from "@database/config";
 import Messages from "@messages";
 
@@ -7,7 +7,7 @@ const database = config.database as string;
 const username = config.username as string;
 const password = config.password as string;
 const host = config.host as string;
-const dialect = config.dialect as Dialect;
+const dialect = "postgres";
 
 export const sequelize = new Sequelize(database, username, password, {
   host,

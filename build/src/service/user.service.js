@@ -7,15 +7,14 @@ const joi_1 = __importDefault(require("joi"));
 const _exceptions_1 = require("@exceptions");
 const _helper_1 = require("@helper");
 const bcrypt_1 = __importDefault(require("bcrypt"));
-const _repo_1 = __importDefault(require("@repo"));
+const _repo_1 = require("@repo");
 const _messages_1 = __importDefault(require("@messages"));
 const _utils_1 = __importDefault(require("@utils"));
-const readerProfile_repo_1 = __importDefault(require("repo/readerProfile.repo"));
 class UserService {
     static async signUp(data) {
         _helper_1.ValidateFields.emailValidation(data.email);
         const email = data.email.toLowerCase();
-        const user = await _repo_1.default.findUser(email);
+        const user = await _repo_1.UserRepo.findUser(email);
         if (user) {
             throw new _exceptions_1.BadRequestExceptionError(_messages_1.default.emailExist);
         }
@@ -34,9 +33,9 @@ class UserService {
             lastName: data.lastName,
             role: data.role,
         };
-        const createdUser = await _repo_1.default.createUser(userData);
+        const createdUser = await _repo_1.UserRepo.createUser(userData);
         if (data.role === "Reader") {
-            await readerProfile_repo_1.default.createReaderBio({ id: createdUser.dataValues.id });
+            await _repo_1.ReaderBioRepo.createReaderBio({ id: createdUser.dataValues.id });
         }
         const token = _utils_1.default.createToken(createdUser.dataValues);
         return { ...createdUser.dataValues, token };
@@ -46,7 +45,7 @@ class UserService {
         const passwordSchema = joi_1.default.string().required();
         _helper_1.ValidateFields.passwordValidation(data.password, passwordSchema);
         const email = data.email.toLowerCase();
-        const user = await _repo_1.default.findUser(email);
+        const user = await _repo_1.UserRepo.findUser(email);
         if (!user) {
             throw new _exceptions_1.NotFoundExceptionError(_messages_1.default.noUserExist);
         }
@@ -58,11 +57,11 @@ class UserService {
         return { token };
     }
     static async updateReaderProfile(data) {
-        const user = await _repo_1.default.findUserByID(data.id);
+        const user = await _repo_1.UserRepo.findUserByID(data.id);
         if (user?.dataValues.role !== "Reader") {
             throw new _exceptions_1.UnauthorizedExceptionError(_messages_1.default.wrongUserRole);
         }
-        const updatedProfile = await readerProfile_repo_1.default.updateReaderProfile(data);
+        const updatedProfile = await _repo_1.ReaderBioRepo.updateReaderProfile(data);
         return updatedProfile;
     }
 }
