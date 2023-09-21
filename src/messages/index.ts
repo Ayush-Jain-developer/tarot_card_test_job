@@ -18,6 +18,20 @@ class Messages {
 
   static readonly passwordNotMatch =
     "Password and Confirm Password do not match.";
+
+  static readonly noUserExist = "User not found. Please signUp.";
+
+  static readonly wrongPassword = "Password incorrect.";
+
+  static readonly loggedIn = "Logged in successfully.";
+
+  static readonly tokenMissing = "Unauthorized - Token missing";
+
+  static readonly invalidToken = "Unauthorized - Invalid token";
+
+  static readonly wrongUserRole = "Unauthorized - User role is not correct";
+
+  static readonly readerBioCreated = "Reader bio updated successfully.";
 }
 
 export default Messages;

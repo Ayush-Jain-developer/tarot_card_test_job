@@ -1,3 +1,4 @@
 import UserInterface from "./user.interface";
+import ReaderBioInterface from "./readerBio.interface";
 
-export default UserInterface;
+export { UserInterface, ReaderBioInterface };

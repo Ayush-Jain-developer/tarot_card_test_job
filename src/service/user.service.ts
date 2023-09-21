@@ -1,29 +1,20 @@
 import Joi from "joi";
-import UserInterface from "@interfaces";
-import BadRequestExceptionError from "@exceptions";
-import { ValidateFields, errorMessage } from "@helper";
+import { ReaderBioInterface, UserInterface } from "@interfaces";
+import {
+  BadRequestExceptionError,
+  NotFoundExceptionError,
+  UnauthorizedExceptionError,
+} from "@exceptions";
+import { ValidateFields } from "@helper";
 import bcrypt from "bcrypt";
 import UserRepo from "@repo";
 import Messages from "@messages";
 import Jwt from "@utils";
-import dotenv from "dotenv";
-
-const NODE_ENV = process.env.NODE_ENV || "development";
-dotenv.config({ path: `.env.${NODE_ENV}` });
-const secretKey = process.env.SECRET_KEY as string;
+import ReaderBioRepo from "repo/readerProfile.repo";
 
 class UserService {
   static async signUp(data: UserInterface) {
-    const emailSchema = Joi.string().email().required();
-    const emailValidation = emailSchema.validate(data.email);
-    if (emailValidation.error) {
-      const message = errorMessage(
-        "Email",
-        emailValidation.error.details[0].message,
-      );
-
-      throw new BadRequestExceptionError(message);
-    }
+    ValidateFields.emailValidation(data.email);
     const email = data.email.toLowerCase();
     const user = await UserRepo.findUser(email);
     if (user) {
@@ -31,14 +22,7 @@ class UserService {
     }
     ValidateFields.stringRequired(data.role, "Role");
     const passwordSchema = Joi.string().min(8).max(30).required();
-    const passwordValidation = passwordSchema.validate(data.password);
-    if (passwordValidation.error) {
-      const message = errorMessage(
-        "Password",
-        passwordValidation.error.details[0].message,
-      );
-      throw new BadRequestExceptionError(message);
-    }
+    ValidateFields.passwordValidation(data.password, passwordSchema);
     if (data.password !== data.confirmPassword) {
       throw new BadRequestExceptionError(Messages.passwordNotMatch);
     }
@@ -52,10 +36,41 @@ class UserService {
       role: data.role,
     };
     const createdUser = await UserRepo.createUser(userData);
-
-    const token = Jwt.createToken(createdUser.dataValues, secretKey);
+    if (data.role === "Reader") {
+      await ReaderBioRepo.createReaderBio({ id: createdUser.dataValues.id });
+    }
+    const token = Jwt.createToken(createdUser.dataValues);
 
     return { ...createdUser.dataValues, token };
+  }
+
+  static async logIn(data: { email: string; password: string }) {
+    ValidateFields.emailValidation(data.email);
+    const passwordSchema = Joi.string().required();
+    ValidateFields.passwordValidation(data.password, passwordSchema);
+    const email = data.email.toLowerCase();
+    const user = await UserRepo.findUser(email);
+    if (!user) {
+      throw new NotFoundExceptionError(Messages.noUserExist);
+    }
+    const comparePassword = await bcrypt.compare(
+      data.password,
+      user.dataValues.password,
+    );
+    if (!comparePassword) {
+      throw new UnauthorizedExceptionError(Messages.wrongPassword);
+    }
+    const token = Jwt.createToken(user.dataValues);
+    return { token };
+  }
+
+  static async updateReaderProfile(data: ReaderBioInterface) {
+    const user = await UserRepo.findUserByID(data.id);
+    if (user?.dataValues.role !== "Reader") {
+      throw new UnauthorizedExceptionError(Messages.wrongUserRole);
+    }
+    const updatedProfile = await ReaderBioRepo.updateReaderProfile(data);
+    return updatedProfile;
   }
 }
 

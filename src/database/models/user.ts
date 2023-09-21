@@ -1,8 +1,9 @@
-import { DataTypes } from "sequelize";
+import { DataTypes, Model } from "sequelize";
 import { sequelize } from "@database/connection";
 
-const user = sequelize.define(
-  "users",
+class User extends Model {}
+
+User.init(
   {
     id: {
       type: DataTypes.UUID,
@@ -32,9 +33,12 @@ const user = sequelize.define(
     },
   },
   {
+    sequelize,
+    modelName: "user",
+    tableName: "users",
     paranoid: true,
     indexes: [{ unique: true, fields: ["email"] }],
   },
 );
 
-export default user;
+export default User;

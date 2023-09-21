@@ -12,5 +12,8 @@ class UserRepo {
             },
         });
     }
+    static async findUserByID(id) {
+        return models_1.models.user.findByPk(id);
+    }
 }
 exports.default = UserRepo;

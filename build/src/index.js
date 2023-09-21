@@ -3,11 +3,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+/* eslint-disable import/no-extraneous-dependencies */
 /* eslint-disable no-console */
 const express_1 = __importDefault(require("express"));
 const http_1 = __importDefault(require("http"));
 const socket_io_1 = require("socket.io");
 const dotenv_1 = __importDefault(require("dotenv"));
+const cors_1 = __importDefault(require("cors"));
 const connection_1 = require("@database/connection");
 const models_1 = require("@database/models");
 const _routes_1 = __importDefault(require("@routes"));
@@ -24,6 +26,12 @@ io.on("connection", (socket) => {
         console.log("User disconnected");
     });
 });
+const corsOptions = {
+    origin: "*",
+    methods: ["POST", "GET", "PUT", "DELETE"],
+    Headers: ["Authorization", "Content-Type"],
+};
+app.use((0, cors_1.default)(corsOptions));
 app.use(express_1.default.json());
 app.use(_routes_1.default);
 server.listen(port, () => {
@@ -34,6 +42,7 @@ async function dbConfig() {
     await (0, models_1.databaseSync)();
 }
 dbConfig();
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 app.use((error, req, res, next) => res.json({
     status: error.statusCode || 500,
     message: error.message || _messages_1.default.serverError,

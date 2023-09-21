@@ -2,7 +2,9 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const sequelize_1 = require("sequelize");
 const connection_1 = require("@database/connection");
-const user = connection_1.sequelize.define("users", {
+class User extends sequelize_1.Model {
+}
+User.init({
     id: {
         type: sequelize_1.DataTypes.UUID,
         primaryKey: true,
@@ -30,7 +32,10 @@ const user = connection_1.sequelize.define("users", {
         allowNull: false,
     },
 }, {
+    sequelize: connection_1.sequelize,
+    modelName: "user",
+    tableName: "users",
     paranoid: true,
     indexes: [{ unique: true, fields: ["email"] }],
 });
-exports.default = user;
+exports.default = User;

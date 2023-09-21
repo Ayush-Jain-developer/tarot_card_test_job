@@ -1,8 +1,10 @@
+/* eslint-disable import/no-extraneous-dependencies */
 /* eslint-disable no-console */
 import express, { NextFunction, Request, Response } from "express";
 import http from "http";
 import { Server } from "socket.io";
 import dotenv from "dotenv";
+import cors from "cors";
 import { dbConnection } from "@database/connection";
 import { databaseSync } from "@database/models";
 import userRoute from "@routes";
@@ -23,6 +25,13 @@ io.on("connection", (socket) => {
   });
 });
 
+const corsOptions = {
+  origin: "*",
+  methods: ["POST", "GET", "PUT", "DELETE"],
+  Headers: ["Authorization", "Content-Type"],
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(userRoute);
 

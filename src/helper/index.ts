@@ -1,6 +1,6 @@
 import { Response } from "express";
 import Joi from "joi";
-import BadRequestExceptionError from "@exceptions";
+import { BadRequestExceptionError } from "@exceptions";
 
 export const errorMessage = (word: string, message: string) => {
   const originalString = message;
@@ -16,6 +16,32 @@ export class ValidateFields {
     const validation = schema.validate(field);
     if (validation.error) {
       const message = errorMessage(word, validation.error.details[0].message);
+      throw new BadRequestExceptionError(message);
+    }
+  }
+
+  static emailValidation(email: string) {
+    const schema = Joi.string().email().required();
+    const validation = schema.validate(email);
+    if (validation.error) {
+      const message = errorMessage(
+        "Email",
+        validation.error.details[0].message,
+      );
+      throw new BadRequestExceptionError(message);
+    }
+  }
+
+  static passwordValidation(
+    password: string,
+    schema: Joi.StringSchema<string>,
+  ) {
+    const validation = schema.validate(password);
+    if (validation.error) {
+      const message = errorMessage(
+        "Password",
+        validation.error.details[0].message,
+      );
       throw new BadRequestExceptionError(message);
     }
   }

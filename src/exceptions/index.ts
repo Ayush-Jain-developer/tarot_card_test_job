@@ -1,13 +1,9 @@
-class BadRequestExceptionError extends Error {
-  message;
+import BadRequestExceptionError from "./badRequest.exception";
+import NotFoundExceptionError from "./notFound.exception";
+import UnauthorizedExceptionError from "./unauthorized.exception";
 
-  statusCode;
-
-  constructor(message: string) {
-    super(message);
-    this.message = message;
-    this.statusCode = 400;
-  }
-}
-
-export default BadRequestExceptionError;
+export {
+  BadRequestExceptionError,
+  NotFoundExceptionError,
+  UnauthorizedExceptionError,
+};

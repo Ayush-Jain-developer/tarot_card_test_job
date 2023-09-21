@@ -7,6 +7,7 @@ module.exports = {
     plugins: ['prettier'],
     parserOptions: {
       'project': './tsconfig.json',
+      tsconfigRootDir: __dirname,
     },
     ignorePatterns : ['.eslintrc.js'],
     rules: {
