@@ -3,6 +3,7 @@ import UserService from "@service";
 import { apiResponse } from "@helper";
 import { ReaderBioInterface, UserInterface } from "@interfaces";
 import Messages from "@messages";
+import Jwt from "@utils";
 
 class UserController {
   static async signUp(req: Request, res: Response, next: NextFunction) {
@@ -37,6 +38,27 @@ class UserController {
       const response = await UserService.updateReaderProfile(data);
       const message = Messages.readerBioCreated;
       return apiResponse(res, 200, message, response[1][0]);
+    } catch (error) {
+      return next(error);
+    }
+  }
+
+  static async tokenGeneration(req: Request, res: Response) {
+    const userId = req.body.id;
+    const response = Jwt.createTokens({ id: userId });
+    const message = Messages.tokensGenerated;
+    return apiResponse(res, 200, message, {
+      ...response,
+      refreshTokenExpiry: Messages.refreshTokenExpiry,
+    });
+  }
+
+  static async getUser(req: Request, res: Response, next: NextFunction) {
+    const userId = req.body.id;
+    try {
+      const response = await UserService.getUser(userId);
+      const message = Messages.userData;
+      return apiResponse(res, 200, message, response);
     } catch (error) {
       return next(error);
     }

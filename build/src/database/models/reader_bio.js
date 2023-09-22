@@ -19,9 +19,6 @@ ReaderBio.init({
     specialities: {
         type: sequelize_1.DataTypes.ARRAY(sequelize_1.DataTypes.STRING),
     },
-    availability: {
-        type: sequelize_1.DataTypes.BOOLEAN,
-    },
 }, {
     sequelize: connection_1.sequelize,
     modelName: "readerBio",

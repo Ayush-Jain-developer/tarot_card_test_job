@@ -9,5 +9,7 @@ const _utils_1 = __importDefault(require("@utils"));
 const userRoute = express_1.default.Router();
 userRoute.post("/signUp", _controller_1.default.signUp);
 userRoute.post("/logIn", _controller_1.default.logIn);
+userRoute.post("/refreshToken", _utils_1.default.verifyToken, _controller_1.default.tokenGeneration);
 userRoute.put("/readerProfile", _utils_1.default.verifyToken, _controller_1.default.updateReaderProfile);
+userRoute.get("/user", _utils_1.default.verifyToken, _controller_1.default.getUser);
 exports.default = userRoute;

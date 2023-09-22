@@ -11,10 +11,14 @@ const NODE_ENV = process.env.NODE_ENV || "development";
 dotenv_1.default.config({ path: `.env.${NODE_ENV}` });
 const secretKey = process.env.SECRET_KEY;
 class Jwt {
-    static createToken(payLoad) {
-        return jsonwebtoken_1.default.sign(payLoad, secretKey, {
-            expiresIn: "1m",
+    static createTokens(payLoad) {
+        const accessToken = jsonwebtoken_1.default.sign(payLoad, secretKey, {
+            expiresIn: "2d",
         });
+        const refreshToken = jsonwebtoken_1.default.sign(payLoad, secretKey, {
+            expiresIn: "7d",
+        });
+        return { accessToken, refreshToken };
     }
     static verifyToken(req, res, next) {
         const token = req.header("Authorization");

@@ -3,6 +3,7 @@ import { BadRequestExceptionError } from "@exceptions";
 import { ReaderBioRepo, UserRepo } from "@repo";
 import bcrypt from "bcrypt";
 import Jwt from "@utils";
+import Messages from "@messages";
 
 const actualMockData = {
   email: "john@gmail.com",
@@ -25,8 +26,12 @@ const returnMockData = {
   deletedAt: null,
 };
 
-const token =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjRkMDNmNjFjLTk5MTItNDE4YS04O";
+const mockTokens = {
+  accessToken:
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjRkMDNmNjFjLTk5MTItNDE4YS04O",
+  refreshToken:
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.wvvwgwegq3r3443y66ujyteebgrtwb5yj4yg4",
+};
 
 const wrongEmailMockData = {
   email: "johngmail.com",
@@ -90,7 +95,7 @@ describe("signUp API", () => {
       await UserService.signUp(actualMockData);
     } catch (error: any) {
       expect(error).toBeInstanceOf(BadRequestExceptionError);
-      expect(error.message).toBe("Email already exists");
+      expect(error.message).toBe(Messages.emailExist);
     }
   });
 
@@ -136,7 +141,7 @@ describe("signUp API", () => {
       await UserService.signUp(passwordUnMatchMockData);
     } catch (error: any) {
       expect(error).toBeInstanceOf(BadRequestExceptionError);
-      expect(error.message).toBe("Password and Confirm Password do not match");
+      expect(error.message).toBe(Messages.passwordNotMatch);
     }
   });
 
@@ -150,7 +155,7 @@ describe("signUp API", () => {
     const mockCreateReaderBio = jest.fn();
     ReaderBioRepo.createReaderBio = mockCreateReaderBio.mockResolvedValue(null);
     const mockCreateToken = jest.fn();
-    Jwt.createToken = mockCreateToken.mockReturnValue(token);
+    Jwt.createTokens = mockCreateToken.mockReturnValue(mockTokens);
     bcrypt.genSalt = jest.fn();
     bcrypt.hash = jest.fn();
     const response = await UserService.signUp(actualMockData);
@@ -158,6 +163,10 @@ describe("signUp API", () => {
     expect(bcrypt.genSalt).toHaveBeenCalled();
     expect(bcrypt.hash).toHaveBeenCalled();
     expect(ReaderBioRepo.createReaderBio).toHaveBeenCalled();
-    expect(response).toStrictEqual({ ...returnMockData, token });
+    expect(response).toStrictEqual({
+      ...returnMockData,
+      ...mockTokens,
+      refreshTokenExpiry: Messages.refreshTokenExpiry,
+    });
   });
 });

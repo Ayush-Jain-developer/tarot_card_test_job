@@ -33,6 +33,13 @@ class Messages {
   static readonly readerBioCreated = "Reader bio updated successfully";
 
   static readonly tokenExpired = "Unauthorized - User session expired";
+
+  static readonly refreshTokenExpiry = "7 Days";
+
+  static readonly tokensGenerated =
+    "Access and Refresh tokens generated successfully";
+
+  static readonly userData = "User Data";
 }
 
 export default Messages;

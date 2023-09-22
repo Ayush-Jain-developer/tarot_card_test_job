@@ -15,9 +15,6 @@ ReaderBio.init(
     specialities: {
       type: DataTypes.ARRAY(DataTypes.STRING),
     },
-    availability: {
-      type: DataTypes.BOOLEAN,
-    },
   },
   {
     sequelize,

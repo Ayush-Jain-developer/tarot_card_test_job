@@ -18,5 +18,8 @@ class Messages {
     static wrongUserRole = "Unauthorized - User role is not correct";
     static readerBioCreated = "Reader bio updated successfully";
     static tokenExpired = "Unauthorized - User session expired";
+    static refreshTokenExpiry = "7 Days";
+    static tokensGenerated = "Access and Refresh tokens generated successfully";
+    static userData = "User Data";
 }
 exports.default = Messages;

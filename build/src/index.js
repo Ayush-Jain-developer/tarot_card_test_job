@@ -19,7 +19,7 @@ dotenv_1.default.config({ path: `.env.${NODE_ENV}` });
 const app = (0, express_1.default)();
 const server = http_1.default.createServer(app);
 const io = new socket_io_1.Server(server);
-const port = process.env.PORT;
+const port = process.env.PORT || 3000;
 io.on("connection", (socket) => {
     console.log("User connected");
     socket.on("disconnect", () => {
@@ -37,11 +37,11 @@ app.use(_routes_1.default);
 server.listen(port, () => {
     console.log(_messages_1.default.server + port);
 });
-async function dbConfig() {
+async function dbConnect() {
     await (0, connection_1.dbConnection)();
     await (0, models_1.databaseSync)();
 }
-dbConfig();
+dbConnect();
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 app.use((error, req, res, next) => res.json({
     status: error.statusCode || 500,

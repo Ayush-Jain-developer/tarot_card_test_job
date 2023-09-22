@@ -16,7 +16,7 @@ dotenv.config({ path: `.env.${NODE_ENV}` });
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
-const port = process.env.PORT;
+const port = process.env.PORT || 3000;
 
 io.on("connection", (socket) => {
   console.log("User connected");
@@ -39,11 +39,11 @@ server.listen(port, () => {
   console.log(Messages.server + port);
 });
 
-async function dbConfig() {
+async function dbConnect() {
   await dbConnection();
   await databaseSync();
 }
-dbConfig();
+dbConnect();
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 app.use((error: any, req: Request, res: Response, next: NextFunction) =>

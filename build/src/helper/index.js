@@ -23,6 +23,14 @@ class ValidateFields {
             throw new _exceptions_1.BadRequestExceptionError(message);
         }
     }
+    static arrayRequired(field, word) {
+        const schema = joi_1.default.array().required();
+        const validation = schema.validate(field);
+        if (validation.error) {
+            const message = (0, exports.errorMessage)(word, validation.error.details[0].message);
+            throw new _exceptions_1.BadRequestExceptionError(message);
+        }
+    }
     static emailValidation(email) {
         const schema = joi_1.default.string().email().required();
         const validation = schema.validate(email);

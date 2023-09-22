@@ -12,7 +12,6 @@ class ReaderBioRepo {
         return models_1.models.readerBio.update({
             bio: data.bio,
             specialities: data.specialities,
-            avalability: data.availability,
         }, {
             where: {
                 id: data.id,

@@ -11,8 +11,17 @@ export const errorMessage = (word: string, message: string) => {
 };
 
 export class ValidateFields {
-  static stringRequired(field: any, word: string) {
+  static stringRequired(field: string, word: string) {
     const schema = Joi.string().required();
+    const validation = schema.validate(field);
+    if (validation.error) {
+      const message = errorMessage(word, validation.error.details[0].message);
+      throw new BadRequestExceptionError(message);
+    }
+  }
+
+  static arrayRequired(field: string[], word: string) {
+    const schema = Joi.array().required();
     const validation = schema.validate(field);
     if (validation.error) {
       const message = errorMessage(word, validation.error.details[0].message);

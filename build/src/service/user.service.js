@@ -37,8 +37,12 @@ class UserService {
         if (data.role === "Reader") {
             await _repo_1.ReaderBioRepo.createReaderBio({ id: createdUser.dataValues.id });
         }
-        const token = _utils_1.default.createToken(createdUser.dataValues);
-        return { ...createdUser.dataValues, token };
+        const token = _utils_1.default.createTokens({ id: createdUser.dataValues.id });
+        return {
+            ...createdUser.dataValues,
+            ...token,
+            refreshTokenExpiry: _messages_1.default.refreshTokenExpiry,
+        };
     }
     static async logIn(data) {
         _helper_1.ValidateFields.emailValidation(data.email);
@@ -53,16 +57,65 @@ class UserService {
         if (!comparePassword) {
             throw new _exceptions_1.UnauthorizedExceptionError(_messages_1.default.wrongPassword);
         }
-        const token = _utils_1.default.createToken(user.dataValues);
-        return { token };
+        const token = _utils_1.default.createTokens({ id: user.dataValues.id });
+        const responseData = {
+            id: user.dataValues.id,
+            role: user.dataValues.role,
+            accessToken: token.accessToken,
+            refreshToken: token.refreshToken,
+            refreshTokenExpiry: _messages_1.default.refreshTokenExpiry,
+        };
+        if (user.dataValues.role === "Reader") {
+            const readerBio = (await _repo_1.ReaderBioRepo.findReaderBioById(user.dataValues.id));
+            if (readerBio.bio && readerBio.specialities.length) {
+                responseData.profileUpdated = true;
+            }
+            else {
+                responseData.profileUpdated = false;
+            }
+        }
+        return responseData;
     }
     static async updateReaderProfile(data) {
+        _helper_1.ValidateFields.stringRequired(data.bio, "Bio");
+        _helper_1.ValidateFields.arrayRequired(data.specialities, "Specialities");
         const user = await _repo_1.UserRepo.findUserByID(data.id);
         if (user?.dataValues.role !== "Reader") {
             throw new _exceptions_1.UnauthorizedExceptionError(_messages_1.default.wrongUserRole);
         }
         const updatedProfile = await _repo_1.ReaderBioRepo.updateReaderProfile(data);
         return updatedProfile;
+    }
+    static async getUser(userId) {
+        const user = await _repo_1.UserRepo.findUserByID(userId);
+        if (!user) {
+            throw new _exceptions_1.BadRequestExceptionError(_messages_1.default.noUserExist);
+        }
+        let responseData;
+        if (user?.dataValues.role === "Reader") {
+            const userBio = await _repo_1.ReaderBioRepo.findReaderBioById(userId);
+            responseData = {
+                id: user.dataValues.id,
+                email: user.dataValues.email,
+                profilePicture: user.dataValues.profilePicture,
+                firstName: user.dataValues.firstName,
+                lastName: user.dataValues.lastName,
+                role: user.dataValues.role,
+                bio: userBio?.dataValues.bio,
+                specialities: userBio?.dataValues.specialities,
+            };
+        }
+        else {
+            responseData = {
+                id: user?.dataValues.id,
+                email: user?.dataValues.email,
+                profilePicture: user?.dataValues.profilePicture,
+                firstName: user?.dataValues.firstName,
+                lastName: user?.dataValues.lastName,
+                role: user?.dataValues.role,
+            };
+        }
+        return responseData;
     }
 }
 exports.default = UserService;

@@ -1,6 +1,7 @@
 import UserService from "@service";
 import { ReaderBioRepo, UserRepo } from "@repo";
 import { UnauthorizedExceptionError } from "@exceptions";
+import Messages from "@messages";
 
 const mockWrongRoleUserData = {
   id: "4d03f61c-9912-418a-8809-91fbb73ceb05",
@@ -36,7 +37,6 @@ const mockDataForUpdate = {
     "Spiritual Guidance: Providing spiritual insight, connecting clients with their inner selves, and assisting in their spiritual journeys.",
     "Life Path and Purpose: Assisting clients in discovering their life's purpose, clarifying their goals, and aligning with their true path.",
   ],
-  availability: true,
 };
 
 const updatedMockData = {
@@ -47,7 +47,6 @@ const updatedMockData = {
     "Spiritual Guidance: Providing spiritual insight, connecting clients with their inner selves, and assisting in their spiritual journeys.",
     "Life Path and Purpose: Assisting clients in discovering their life's purpose, clarifying their goals, and aligning with their true path.",
   ],
-  availability: true,
   updatedAt: "2023-09-21T09:02:02.717Z",
   createdAt: "2023-10-21T09:02:02.717Z",
   deletedAt: null,
@@ -63,7 +62,7 @@ describe("Reader bio API", () => {
       await UserService.updateReaderProfile(mockDataForUpdate);
     } catch (error: any) {
       expect(error).toBeInstanceOf(UnauthorizedExceptionError);
-      expect(error.message).toBe("Unauthorized - User role is not correct");
+      expect(error.message).toBe(Messages.wrongUserRole);
     }
   });
 

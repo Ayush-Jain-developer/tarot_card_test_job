@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const _service_1 = __importDefault(require("@service"));
 const _helper_1 = require("@helper");
 const _messages_1 = __importDefault(require("@messages"));
+const _utils_1 = __importDefault(require("@utils"));
 class UserController {
     static async signUp(req, res, next) {
         const data = req.body;
@@ -35,6 +36,26 @@ class UserController {
             const response = await _service_1.default.updateReaderProfile(data);
             const message = _messages_1.default.readerBioCreated;
             return (0, _helper_1.apiResponse)(res, 200, message, response[1][0]);
+        }
+        catch (error) {
+            return next(error);
+        }
+    }
+    static async tokenGeneration(req, res) {
+        const userId = req.body.id;
+        const response = _utils_1.default.createTokens({ id: userId });
+        const message = _messages_1.default.tokensGenerated;
+        return (0, _helper_1.apiResponse)(res, 200, message, {
+            ...response,
+            refreshTokenExpiry: _messages_1.default.refreshTokenExpiry,
+        });
+    }
+    static async getUser(req, res, next) {
+        const userId = req.body.id;
+        try {
+            const response = await _service_1.default.getUser(userId);
+            const message = _messages_1.default.userData;
+            return (0, _helper_1.apiResponse)(res, 200, message, response);
         }
         catch (error) {
             return next(error);

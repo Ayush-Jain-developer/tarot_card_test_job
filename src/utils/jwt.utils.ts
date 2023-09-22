@@ -10,10 +10,14 @@ dotenv.config({ path: `.env.${NODE_ENV}` });
 const secretKey = process.env.SECRET_KEY as string;
 
 class Jwt {
-  static createToken(payLoad: Omit<UserInterface, "confirmPassword">) {
-    return jwt.sign(payLoad, secretKey, {
-      expiresIn: "1m",
+  static createTokens(payLoad: Pick<UserInterface, "id">) {
+    const accessToken = jwt.sign(payLoad, secretKey, {
+      expiresIn: "2d",
     });
+    const refreshToken = jwt.sign(payLoad, secretKey, {
+      expiresIn: "7d",
+    });
+    return { accessToken, refreshToken };
   }
 
   static verifyToken(req: Request, res: Response, next: NextFunction) {

@@ -17,7 +17,6 @@ class ReaderBioRepo {
       {
         bio: data.bio,
         specialities: data.specialities,
-        avalability: data.availability,
       },
       {
         where: {

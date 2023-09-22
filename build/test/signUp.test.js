@@ -8,6 +8,7 @@ const _exceptions_1 = require("@exceptions");
 const _repo_1 = require("@repo");
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const _utils_1 = __importDefault(require("@utils"));
+const _messages_1 = __importDefault(require("@messages"));
 const actualMockData = {
     email: "john@gmail.com",
     password: "12345678",
@@ -28,7 +29,10 @@ const returnMockData = {
     profilePicture: null,
     deletedAt: null,
 };
-const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjRkMDNmNjFjLTk5MTItNDE4YS04O";
+const mockTokens = {
+    accessToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjRkMDNmNjFjLTk5MTItNDE4YS04O",
+    refreshToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.wvvwgwegq3r3443y66ujyteebgrtwb5yj4yg4",
+};
 const wrongEmailMockData = {
     email: "johngmail.com",
     password: "12345678",
@@ -87,7 +91,7 @@ describe("signUp API", () => {
         }
         catch (error) {
             expect(error).toBeInstanceOf(_exceptions_1.BadRequestExceptionError);
-            expect(error.message).toBe("Email already exists");
+            expect(error.message).toBe(_messages_1.default.emailExist);
         }
     });
     test("should return error for no role", async () => {
@@ -131,7 +135,7 @@ describe("signUp API", () => {
         }
         catch (error) {
             expect(error).toBeInstanceOf(_exceptions_1.BadRequestExceptionError);
-            expect(error.message).toBe("Password and Confirm Password do not match");
+            expect(error.message).toBe(_messages_1.default.passwordNotMatch);
         }
     });
     test("should return user and token", async () => {
@@ -144,13 +148,17 @@ describe("signUp API", () => {
         const mockCreateReaderBio = jest.fn();
         _repo_1.ReaderBioRepo.createReaderBio = mockCreateReaderBio.mockResolvedValue(null);
         const mockCreateToken = jest.fn();
-        _utils_1.default.createToken = mockCreateToken.mockReturnValue(token);
+        _utils_1.default.createTokens = mockCreateToken.mockReturnValue(mockTokens);
         bcrypt_1.default.genSalt = jest.fn();
         bcrypt_1.default.hash = jest.fn();
         const response = await _service_1.default.signUp(actualMockData);
         expect(bcrypt_1.default.genSalt).toHaveBeenCalled();
         expect(bcrypt_1.default.hash).toHaveBeenCalled();
         expect(_repo_1.ReaderBioRepo.createReaderBio).toHaveBeenCalled();
-        expect(response).toStrictEqual({ ...returnMockData, token });
+        expect(response).toStrictEqual({
+            ...returnMockData,
+            ...mockTokens,
+            refreshTokenExpiry: _messages_1.default.refreshTokenExpiry,
+        });
     });
 });

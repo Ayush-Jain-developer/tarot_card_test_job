@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const _service_1 = __importDefault(require("@service"));
 const _repo_1 = require("@repo");
 const _exceptions_1 = require("@exceptions");
+const _messages_1 = __importDefault(require("@messages"));
 const mockWrongRoleUserData = {
     id: "4d03f61c-9912-418a-8809-91fbb73ceb05",
     email: "john@gmail.com",
@@ -38,7 +39,6 @@ const mockDataForUpdate = {
         "Spiritual Guidance: Providing spiritual insight, connecting clients with their inner selves, and assisting in their spiritual journeys.",
         "Life Path and Purpose: Assisting clients in discovering their life's purpose, clarifying their goals, and aligning with their true path.",
     ],
-    availability: true,
 };
 const updatedMockData = {
     id: "4d03f61c-9912-418a-8809-91fbb73ceb05",
@@ -48,7 +48,6 @@ const updatedMockData = {
         "Spiritual Guidance: Providing spiritual insight, connecting clients with their inner selves, and assisting in their spiritual journeys.",
         "Life Path and Purpose: Assisting clients in discovering their life's purpose, clarifying their goals, and aligning with their true path.",
     ],
-    availability: true,
     updatedAt: "2023-09-21T09:02:02.717Z",
     createdAt: "2023-10-21T09:02:02.717Z",
     deletedAt: null,
@@ -64,7 +63,7 @@ describe("Reader bio API", () => {
         }
         catch (error) {
             expect(error).toBeInstanceOf(_exceptions_1.UnauthorizedExceptionError);
-            expect(error.message).toBe("Unauthorized - User role is not correct");
+            expect(error.message).toBe(_messages_1.default.wrongUserRole);
         }
     });
     test("should return updated reader profile", async () => {
