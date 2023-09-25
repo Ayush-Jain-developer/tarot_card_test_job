@@ -1,7 +1,7 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 import multer from "multer";
 
-const multerUpload = (fileName: string) => {
+const multerUpload = () => {
   const storage = multer.diskStorage({
     destination(req, file, cb) {
       cb(null, "uploads");
@@ -12,7 +12,7 @@ const multerUpload = (fileName: string) => {
   });
 
   const upload = multer({ storage });
-  return upload.single(fileName);
+  return upload.single("profile");
 };
 
 export default multerUpload;

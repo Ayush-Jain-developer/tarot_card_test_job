@@ -1,13 +1,15 @@
 import UserService from "@service";
+import { Request } from "express";
 import {
   BadRequestExceptionError,
   NotFoundExceptionError,
   UnauthorizedExceptionError,
 } from "@exceptions";
 import { ReaderBioRepo, UserRepo } from "@repo";
-import Jwt from "@utils";
+import { Jwt } from "@utils";
 import bcrypt from "bcrypt";
 import Messages from "@messages";
+import fs from "fs";
 
 const actualMockData = {
   email: "john@gmail.com",
@@ -86,18 +88,24 @@ const mockUnUpdatedReaderBioData = {
 
 describe("logIn API", () => {
   test("should return error for invalid email", async () => {
+    fs.unlinkSync = jest.fn().mockImplementation(() => true);
     try {
-      await UserService.logIn(wrongEmailMockData);
+      const mockReq = {} as Request;
+      await UserService.logIn(mockReq, wrongEmailMockData);
     } catch (error: any) {
+      expect(fs.unlinkSync).not.toBeCalled();
       expect(error).toBeInstanceOf(BadRequestExceptionError);
       expect(error.message).toBe("Email must be a valid email");
     }
   });
 
   test("should return error for no password", async () => {
+    fs.unlinkSync = jest.fn().mockImplementation(() => true);
     try {
-      await UserService.logIn(noPasswordMockData);
+      const mockReq = {} as Request;
+      await UserService.logIn(mockReq, noPasswordMockData);
     } catch (error: any) {
+      expect(fs.unlinkSync).not.toBeCalled();
       expect(error).toBeInstanceOf(BadRequestExceptionError);
       expect(error.message).toBe("Password is not allowed to be empty");
     }
@@ -107,7 +115,8 @@ describe("logIn API", () => {
     const mockFindUser = jest.fn();
     UserRepo.findUser = mockFindUser.mockResolvedValue(null);
     try {
-      await UserService.logIn(actualMockData);
+      const mockReq = {} as Request;
+      await UserService.logIn(mockReq, actualMockData);
     } catch (error: any) {
       expect(error).toBeInstanceOf(NotFoundExceptionError);
       expect(error.message).toBe(Messages.noUserExist);
@@ -120,7 +129,8 @@ describe("logIn API", () => {
       dataValues: mockUserData,
     });
     try {
-      await UserService.logIn(wrongPasswordMockData);
+      const mockReq = {} as Request;
+      await UserService.logIn(mockReq, wrongPasswordMockData);
     } catch (error: any) {
       expect(error).toBeInstanceOf(UnauthorizedExceptionError);
       expect(error.message).toBe(Messages.wrongPassword);
@@ -138,7 +148,8 @@ describe("logIn API", () => {
     const mockReaderBio = jest.fn();
     ReaderBioRepo.findReaderBioById =
       mockReaderBio.mockResolvedValue(mockReaderBioData);
-    const response = await UserService.logIn(actualMockData);
+    const mockReq = {} as Request;
+    const response = await UserService.logIn(mockReq, actualMockData);
     expect(spyBcrypt).toHaveBeenCalledTimes(1);
     expect(spyBcrypt).toHaveBeenCalledWith(
       actualMockData.password,
@@ -161,7 +172,8 @@ describe("logIn API", () => {
     ReaderBioRepo.findReaderBioById = mockReaderBio.mockResolvedValue(
       mockUnUpdatedReaderBioData,
     );
-    const response = await UserService.logIn(actualMockData);
+    const mockReq = {} as Request;
+    const response = await UserService.logIn(mockReq, actualMockData);
     expect(spyBcrypt).toHaveBeenCalledTimes(1);
     expect(spyBcrypt).toHaveBeenCalledWith(
       actualMockData.password,
@@ -180,7 +192,8 @@ describe("logIn API", () => {
     const spyBcrypt = jest.spyOn(bcrypt, "compare");
     const mockCreateToken = jest.fn();
     Jwt.createTokens = mockCreateToken.mockReturnValue(mockTokens);
-    const response = await UserService.logIn(actualMockData);
+    const mockReq = {} as Request;
+    const response = await UserService.logIn(mockReq, actualMockData);
     expect(spyBcrypt).toHaveBeenCalledTimes(1);
     expect(spyBcrypt).toHaveBeenCalledWith(
       actualMockData.password,

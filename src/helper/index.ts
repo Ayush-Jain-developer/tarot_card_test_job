@@ -1,6 +1,7 @@
-import { Response } from "express";
 import Joi from "joi";
 import { BadRequestExceptionError } from "@exceptions";
+import { Response, Request } from "express";
+import fs from "fs";
 
 export const errorMessage = (word: string, message: string) => {
   const originalString = message;
@@ -11,17 +12,20 @@ export const errorMessage = (word: string, message: string) => {
 };
 
 export class ValidateFields {
-  static stringRequired(field: string, word: string) {
+  static stringRequired(req: Request, field: string, word: string) {
     const schema = Joi.string().required();
     const validation = schema.validate(field);
     if (validation.error) {
       const message = errorMessage(word, validation.error.details[0].message);
+      if (req.file) {
+        fs.unlinkSync(req.file.path);
+      }
       throw new BadRequestExceptionError(message);
     }
   }
 
   static arrayRequired(field: string[], word: string) {
-    const schema = Joi.array().required();
+    const schema = Joi.array().items(Joi.string()).min(1);
     const validation = schema.validate(field);
     if (validation.error) {
       const message = errorMessage(word, validation.error.details[0].message);
@@ -29,7 +33,7 @@ export class ValidateFields {
     }
   }
 
-  static emailValidation(email: string) {
+  static emailValidation(req: Request, email: string) {
     const schema = Joi.string().email().required();
     const validation = schema.validate(email);
     if (validation.error) {
@@ -37,11 +41,15 @@ export class ValidateFields {
         "Email",
         validation.error.details[0].message,
       );
+      if (req.file) {
+        fs.unlinkSync(req.file.path);
+      }
       throw new BadRequestExceptionError(message);
     }
   }
 
   static passwordValidation(
+    req: Request,
     password: string,
     schema: Joi.StringSchema<string>,
   ) {
@@ -51,6 +59,9 @@ export class ValidateFields {
         "Password",
         validation.error.details[0].message,
       );
+      if (req.file) {
+        fs.unlinkSync(req.file.path);
+      }
       throw new BadRequestExceptionError(message);
     }
   }

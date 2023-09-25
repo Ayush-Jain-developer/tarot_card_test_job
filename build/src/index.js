@@ -32,6 +32,7 @@ const corsOptions = {
     Headers: ["Authorization", "Content-Type"],
 };
 app.use((0, cors_1.default)(corsOptions));
+// app.use(express.urlencoded({ extended: true }));
 app.use(express_1.default.json());
 app.use(_routes_1.default);
 server.listen(port, () => {

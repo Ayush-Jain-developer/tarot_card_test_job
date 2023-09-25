@@ -19,4 +19,23 @@ export default class UserRepo {
   static async findUserByID(id: string) {
     return models.user.findByPk(id);
   }
+
+  static async countAllReaders() {
+    return models.user.findAndCountAll({
+      where: {
+        role: "Reader",
+      },
+    });
+  }
+
+  static async getPaginatedReaders(offset: number, limit: number) {
+    return models.user.findAll({
+      where: {
+        role: "Reader",
+      },
+      order: [["email", "ASC"]],
+      offset,
+      limit,
+    });
+  }
 }

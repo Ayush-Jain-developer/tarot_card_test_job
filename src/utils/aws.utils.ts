@@ -1,6 +1,6 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
-import { readFileSync } from "fs";
+import fs from "fs";
 import dotenv from "dotenv";
 
 const NODE_ENV = process.env.NODE_ENV || "development";
@@ -14,25 +14,22 @@ const client = new S3Client({
   },
 });
 
-class S3 {
-  static async uploadFile(filePath: string) {
-    const bucketName = process.env.S3_BUCKET_NAME;
-    const objectKey = filePath;
+const uploadFile = async (filePath: string) => {
+  const bucketName = process.env.S3_BUCKET_NAME;
+  const objectKey = filePath;
 
-    const fileContent = readFileSync(filePath);
+  const fileContent = fs.readFileSync(filePath);
 
-    const params = {
-      Bucket: bucketName,
-      Key: objectKey,
-      Body: fileContent,
-    };
-    try {
-      const response = await client.send(new PutObjectCommand(params));
-      return response;
-    } catch (error: any) {
-      throw new Error(error);
-    }
+  const params = {
+    Bucket: bucketName,
+    Key: objectKey,
+    Body: fileContent,
+  };
+  try {
+    return await client.send(new PutObjectCommand(params));
+  } catch (error: any) {
+    throw new Error(error);
   }
-}
+};
 
-export default S3;
+export default uploadFile;

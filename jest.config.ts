@@ -11,7 +11,6 @@ const config: Config = {
     prefix: "<rootDir>/src",
   }),
   collectCoverageFrom: ["src/**/*.ts"],
-  coverageProvider: "v8",
 };
 
 export default config;

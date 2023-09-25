@@ -15,5 +15,22 @@ class UserRepo {
     static async findUserByID(id) {
         return models_1.models.user.findByPk(id);
     }
+    static async countAllReaders() {
+        return models_1.models.user.findAndCountAll({
+            where: {
+                role: "Reader",
+            },
+        });
+    }
+    static async getPaginatedReaders(offset, limit) {
+        return models_1.models.user.findAll({
+            where: {
+                role: "Reader",
+            },
+            order: [["email", "ASC"]],
+            offset,
+            limit,
+        });
+    }
 }
 exports.default = UserRepo;

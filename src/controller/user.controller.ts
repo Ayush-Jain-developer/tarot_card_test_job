@@ -3,13 +3,14 @@ import UserService from "@service";
 import { apiResponse } from "@helper";
 import { ReaderBioInterface, UserInterface } from "@interfaces";
 import Messages from "@messages";
-import Jwt from "@utils";
+import { Jwt } from "@utils";
 
 class UserController {
   static async signUp(req: Request, res: Response, next: NextFunction) {
     const data: UserInterface = req.body;
+
     try {
-      const response = await UserService.signUp(data);
+      const response = await UserService.signUp(req, data);
       const message = Messages.signedUp;
       return apiResponse(res, 200, message, response);
     } catch (error: any) {
@@ -20,7 +21,7 @@ class UserController {
   static async logIn(req: Request, res: Response, next: NextFunction) {
     const data: { email: string; password: string } = req.body;
     try {
-      const response = await UserService.logIn(data);
+      const response = await UserService.logIn(req, data);
       const message = Messages.loggedIn;
       return apiResponse(res, 200, message, response);
     } catch (error: any) {
@@ -35,7 +36,7 @@ class UserController {
   ) {
     const data: ReaderBioInterface = req.body;
     try {
-      const response = await UserService.updateReaderProfile(data);
+      const response = await UserService.updateReaderProfile(req, data);
       const message = Messages.readerBioCreated;
       return apiResponse(res, 200, message, response[1][0]);
     } catch (error) {
@@ -58,6 +59,17 @@ class UserController {
     try {
       const response = await UserService.getUser(userId);
       const message = Messages.userData;
+      return apiResponse(res, 200, message, response);
+    } catch (error) {
+      return next(error);
+    }
+  }
+
+  static async getAllReaders(req: Request, res: Response, next: NextFunction) {
+    const data: { pageNumber: number; pageSize: number } = req.body;
+    try {
+      const response = await UserService.getAllReaders(data);
+      const message = Messages.readerPaginatedData;
       return apiResponse(res, 200, message, response);
     } catch (error) {
       return next(error);

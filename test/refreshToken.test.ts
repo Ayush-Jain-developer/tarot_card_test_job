@@ -1,5 +1,5 @@
 import UserController from "@controller";
-import Jwt from "@utils";
+import { Jwt } from "@utils";
 import { Request, Response } from "express";
 
 test("should generate tokens", async () => {

@@ -40,6 +40,9 @@ class Messages {
     "Access and Refresh tokens generated successfully";
 
   static readonly userData = "User Data";
+
+  static readonly readerPaginatedData =
+    "Reader data for the given page number and page size";
 }
 
 export default Messages;

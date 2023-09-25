@@ -1,4 +1,6 @@
 import Joi from "joi";
+import { Request } from "express";
+import fs from "fs";
 import {
   LoginResDataInterface,
   ReaderBioInterface,
@@ -13,32 +15,65 @@ import { ValidateFields } from "@helper";
 import bcrypt from "bcrypt";
 import { UserRepo, ReaderBioRepo } from "@repo";
 import Messages from "@messages";
-import Jwt from "@utils";
+import { Jwt, uploadFile } from "@utils";
+import dotenv from "dotenv";
+
+const NODE_ENV = process.env.NODE_ENV || "development";
+dotenv.config({ path: `.env.${NODE_ENV}` });
 
 class UserService {
-  static async signUp(data: UserInterface) {
-    ValidateFields.emailValidation(data.email);
-    const email = data.email.toLowerCase();
-    const user = await UserRepo.findUser(email);
-    if (user) {
-      throw new BadRequestExceptionError(Messages.emailExist);
-    }
-    ValidateFields.stringRequired(data.role, "Role");
+  static async signUp(req: Request, data: UserInterface) {
+    ValidateFields.emailValidation(req, data.email);
+    ValidateFields.stringRequired(req, data.role, "Role");
     const passwordSchema = Joi.string().min(8).max(30).required();
-    ValidateFields.passwordValidation(data.password, passwordSchema);
+    ValidateFields.passwordValidation(req, data.password, passwordSchema);
     if (data.password !== data.confirmPassword) {
+      if (req.file) {
+        fs.unlinkSync(req.file.path);
+      }
       throw new BadRequestExceptionError(Messages.passwordNotMatch);
+    }
+    const mail = data.email.toLowerCase();
+    const user = await UserRepo.findUser(mail);
+    if (user) {
+      if (req.file) {
+        fs.unlinkSync(req.file.path);
+      }
+      throw new BadRequestExceptionError(Messages.emailExist);
     }
     const salt = await bcrypt.genSalt(10);
     const hash = await bcrypt.hash(data.password, salt);
-    const userData = {
+    let responseData: Omit<UserInterface, "id">;
+    const {
+      id,
       email,
-      password: hash,
-      firstName: data.firstName,
-      lastName: data.lastName,
-      role: data.role,
-    };
-    const createdUser = await UserRepo.createUser(userData);
+      password,
+      confirmPassword,
+      createdAt,
+      updatedAt,
+      deletedAt,
+      profilePicture,
+      ...userData
+    } = data;
+    if (req.file) {
+      await uploadFile(req.file.path);
+      fs.unlinkSync(req.file.path);
+      const profile: string = process.env.S3_URL + req.file.path;
+      responseData = {
+        email: mail,
+        password: hash,
+        ...userData,
+        profilePicture: profile,
+      };
+    } else {
+      responseData = {
+        email: mail,
+        password: hash,
+        ...userData,
+      };
+    }
+
+    const createdUser = await UserRepo.createUser(responseData);
     if (data.role === "Reader") {
       await ReaderBioRepo.createReaderBio({ id: createdUser.dataValues.id });
     }
@@ -51,10 +86,10 @@ class UserService {
     };
   }
 
-  static async logIn(data: { email: string; password: string }) {
-    ValidateFields.emailValidation(data.email);
+  static async logIn(req: Request, data: { email: string; password: string }) {
+    ValidateFields.emailValidation(req, data.email);
     const passwordSchema = Joi.string().required();
-    ValidateFields.passwordValidation(data.password, passwordSchema);
+    ValidateFields.passwordValidation(req, data.password, passwordSchema);
     const email = data.email.toLowerCase();
     const user = await UserRepo.findUser(email);
     if (!user) {
@@ -88,8 +123,8 @@ class UserService {
     return responseData;
   }
 
-  static async updateReaderProfile(data: ReaderBioInterface) {
-    ValidateFields.stringRequired(data.bio, "Bio");
+  static async updateReaderProfile(req: Request, data: ReaderBioInterface) {
+    ValidateFields.stringRequired(req, data.bio, "Bio");
     ValidateFields.arrayRequired(data.specialities, "Specialities");
     const user = await UserRepo.findUserByID(data.id);
     if (user?.dataValues.role !== "Reader") {
@@ -105,29 +140,47 @@ class UserService {
       throw new BadRequestExceptionError(Messages.noUserExist);
     }
     let responseData;
+    const {
+      password,
+      confirmPassword,
+      createdAt,
+      updatedAt,
+      deletedAt,
+      ...userData
+    } = user.dataValues;
     if (user?.dataValues.role === "Reader") {
       const userBio = await ReaderBioRepo.findReaderBioById(userId);
       responseData = {
-        id: user.dataValues.id,
-        email: user.dataValues.email,
-        profilePicture: user.dataValues.profilePicture,
-        firstName: user.dataValues.firstName,
-        lastName: user.dataValues.lastName,
-        role: user.dataValues.role,
+        ...userData,
         bio: userBio?.dataValues.bio,
         specialities: userBio?.dataValues.specialities,
       };
     } else {
       responseData = {
-        id: user?.dataValues.id,
-        email: user?.dataValues.email,
-        profilePicture: user?.dataValues.profilePicture,
-        firstName: user?.dataValues.firstName,
-        lastName: user?.dataValues.lastName,
-        role: user?.dataValues.role,
+        ...userData,
       };
     }
     return responseData;
+  }
+
+  static async getAllReaders(data: { pageNumber: number; pageSize: number }) {
+    const readerCount = await UserRepo.countAllReaders();
+    const limit = data.pageSize;
+    const offset = (data.pageNumber - 1) * limit;
+    const response = await UserRepo.getPaginatedReaders(offset, limit);
+    return {
+      ...response,
+      meta: {
+        totalPages: Math.ceil(readerCount.count / data.pageSize),
+        currentPage: data.pageNumber,
+        previousPage: data.pageNumber === 1 ? null : data.pageNumber - 1,
+        nextPage:
+          data.pageNumber + 1 > Math.ceil(readerCount.count / data.pageSize)
+            ? null
+            : data.pageNumber + 1,
+        pageSize: data.pageSize,
+      },
+    };
   }
 }
 

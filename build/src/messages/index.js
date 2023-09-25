@@ -21,5 +21,6 @@ class Messages {
     static refreshTokenExpiry = "7 Days";
     static tokensGenerated = "Access and Refresh tokens generated successfully";
     static userData = "User Data";
+    static readerPaginatedData = "Reader data for the given page number and page size";
 }
 exports.default = Messages;

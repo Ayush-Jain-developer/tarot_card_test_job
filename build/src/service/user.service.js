@@ -4,50 +4,73 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const joi_1 = __importDefault(require("joi"));
+const fs_1 = __importDefault(require("fs"));
 const _exceptions_1 = require("@exceptions");
 const _helper_1 = require("@helper");
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const _repo_1 = require("@repo");
 const _messages_1 = __importDefault(require("@messages"));
-const _utils_1 = __importDefault(require("@utils"));
+const _utils_1 = require("@utils");
+const dotenv_1 = __importDefault(require("dotenv"));
+const NODE_ENV = process.env.NODE_ENV || "development";
+dotenv_1.default.config({ path: `.env.${NODE_ENV}` });
 class UserService {
-    static async signUp(data) {
-        _helper_1.ValidateFields.emailValidation(data.email);
-        const email = data.email.toLowerCase();
-        const user = await _repo_1.UserRepo.findUser(email);
-        if (user) {
-            throw new _exceptions_1.BadRequestExceptionError(_messages_1.default.emailExist);
-        }
-        _helper_1.ValidateFields.stringRequired(data.role, "Role");
+    static async signUp(req, data) {
+        _helper_1.ValidateFields.emailValidation(req, data.email);
+        _helper_1.ValidateFields.stringRequired(req, data.role, "Role");
         const passwordSchema = joi_1.default.string().min(8).max(30).required();
-        _helper_1.ValidateFields.passwordValidation(data.password, passwordSchema);
+        _helper_1.ValidateFields.passwordValidation(req, data.password, passwordSchema);
         if (data.password !== data.confirmPassword) {
+            if (req.file) {
+                fs_1.default.unlinkSync(req.file.path);
+            }
             throw new _exceptions_1.BadRequestExceptionError(_messages_1.default.passwordNotMatch);
+        }
+        const mail = data.email.toLowerCase();
+        const user = await _repo_1.UserRepo.findUser(mail);
+        if (user) {
+            if (req.file) {
+                fs_1.default.unlinkSync(req.file.path);
+            }
+            throw new _exceptions_1.BadRequestExceptionError(_messages_1.default.emailExist);
         }
         const salt = await bcrypt_1.default.genSalt(10);
         const hash = await bcrypt_1.default.hash(data.password, salt);
-        const userData = {
-            email,
-            password: hash,
-            firstName: data.firstName,
-            lastName: data.lastName,
-            role: data.role,
-        };
-        const createdUser = await _repo_1.UserRepo.createUser(userData);
+        let responseData;
+        const { id, email, password, confirmPassword, createdAt, updatedAt, deletedAt, profilePicture, ...userData } = data;
+        if (req.file) {
+            await (0, _utils_1.uploadFile)(req.file.path);
+            fs_1.default.unlinkSync(req.file.path);
+            const profile = `https://tarotcardtestjob.s3.ap-south-1.amazonaws.com/${req.file.path}`;
+            responseData = {
+                email: mail,
+                password: hash,
+                ...userData,
+                profilePicture: profile,
+            };
+        }
+        else {
+            responseData = {
+                email: mail,
+                password: hash,
+                ...userData,
+            };
+        }
+        const createdUser = await _repo_1.UserRepo.createUser(responseData);
         if (data.role === "Reader") {
             await _repo_1.ReaderBioRepo.createReaderBio({ id: createdUser.dataValues.id });
         }
-        const token = _utils_1.default.createTokens({ id: createdUser.dataValues.id });
+        const token = _utils_1.Jwt.createTokens({ id: createdUser.dataValues.id });
         return {
             ...createdUser.dataValues,
             ...token,
             refreshTokenExpiry: _messages_1.default.refreshTokenExpiry,
         };
     }
-    static async logIn(data) {
-        _helper_1.ValidateFields.emailValidation(data.email);
+    static async logIn(req, data) {
+        _helper_1.ValidateFields.emailValidation(req, data.email);
         const passwordSchema = joi_1.default.string().required();
-        _helper_1.ValidateFields.passwordValidation(data.password, passwordSchema);
+        _helper_1.ValidateFields.passwordValidation(req, data.password, passwordSchema);
         const email = data.email.toLowerCase();
         const user = await _repo_1.UserRepo.findUser(email);
         if (!user) {
@@ -57,7 +80,7 @@ class UserService {
         if (!comparePassword) {
             throw new _exceptions_1.UnauthorizedExceptionError(_messages_1.default.wrongPassword);
         }
-        const token = _utils_1.default.createTokens({ id: user.dataValues.id });
+        const token = _utils_1.Jwt.createTokens({ id: user.dataValues.id });
         const responseData = {
             id: user.dataValues.id,
             role: user.dataValues.role,
@@ -76,8 +99,8 @@ class UserService {
         }
         return responseData;
     }
-    static async updateReaderProfile(data) {
-        _helper_1.ValidateFields.stringRequired(data.bio, "Bio");
+    static async updateReaderProfile(req, data) {
+        _helper_1.ValidateFields.stringRequired(req, data.bio, "Bio");
         _helper_1.ValidateFields.arrayRequired(data.specialities, "Specialities");
         const user = await _repo_1.UserRepo.findUserByID(data.id);
         if (user?.dataValues.role !== "Reader") {
@@ -92,30 +115,39 @@ class UserService {
             throw new _exceptions_1.BadRequestExceptionError(_messages_1.default.noUserExist);
         }
         let responseData;
+        const { password, confirmPassword, createdAt, updatedAt, deletedAt, ...userData } = user.dataValues;
         if (user?.dataValues.role === "Reader") {
             const userBio = await _repo_1.ReaderBioRepo.findReaderBioById(userId);
             responseData = {
-                id: user.dataValues.id,
-                email: user.dataValues.email,
-                profilePicture: user.dataValues.profilePicture,
-                firstName: user.dataValues.firstName,
-                lastName: user.dataValues.lastName,
-                role: user.dataValues.role,
+                ...userData,
                 bio: userBio?.dataValues.bio,
                 specialities: userBio?.dataValues.specialities,
             };
         }
         else {
             responseData = {
-                id: user?.dataValues.id,
-                email: user?.dataValues.email,
-                profilePicture: user?.dataValues.profilePicture,
-                firstName: user?.dataValues.firstName,
-                lastName: user?.dataValues.lastName,
-                role: user?.dataValues.role,
+                ...userData,
             };
         }
         return responseData;
+    }
+    static async getAllReaders(data) {
+        const readerCount = await _repo_1.UserRepo.countAllReaders();
+        const limit = data.pageSize;
+        const offset = (data.pageNumber - 1) * limit;
+        const response = await _repo_1.UserRepo.getPaginatedReaders(offset, limit);
+        return {
+            ...response,
+            meta: {
+                totalPages: Math.ceil(readerCount.count / data.pageSize),
+                currentPage: data.pageNumber,
+                previousPage: data.pageNumber === 1 ? null : data.pageNumber - 1,
+                nextPage: data.pageNumber + 1 > Math.ceil(readerCount.count / data.pageSize)
+                    ? null
+                    : data.pageNumber + 1,
+                pageSize: data.pageSize,
+            },
+        };
     }
 }
 exports.default = UserService;
