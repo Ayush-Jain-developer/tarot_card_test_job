@@ -1,3 +1,4 @@
 import userRoute from "./user.routes";
+import ratingRoute from "./rating.route";
 
-export default userRoute;
+export { userRoute, ratingRoute };

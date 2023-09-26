@@ -1,6 +1,6 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "@database/connection";
-import User from "./user";
+import User from "./user.model";
 
 class ReaderBio extends User {}
 ReaderBio.init(
@@ -21,6 +21,7 @@ ReaderBio.init(
     modelName: "readerBio",
     tableName: "reader_bio",
     paranoid: true,
+    indexes: [{ unique: true, fields: ["id"] }],
   },
 );
 

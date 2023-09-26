@@ -43,6 +43,11 @@ class Messages {
 
   static readonly readerPaginatedData =
     "Reader data for the given page number and page size";
+
+  static readonly invalidFileType =
+    "Invalid file type. Only JPEG, JPG, PNG, and SVG files are allowed";
+
+  static readonly userRating = "User review and rating saved successfully";
 }
 
 export default Messages;

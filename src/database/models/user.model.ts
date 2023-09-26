@@ -28,7 +28,7 @@ User.init(
       type: DataTypes.STRING,
     },
     role: {
-      type: DataTypes.STRING,
+      type: DataTypes.ENUM("Reader", "Client"),
       allowNull: false,
     },
   },

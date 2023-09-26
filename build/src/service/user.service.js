@@ -6,7 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const joi_1 = __importDefault(require("joi"));
 const fs_1 = __importDefault(require("fs"));
 const _exceptions_1 = require("@exceptions");
-const _helper_1 = require("@helper");
+const _validations_1 = __importDefault(require("@validations"));
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const _repo_1 = require("@repo");
 const _messages_1 = __importDefault(require("@messages"));
@@ -16,10 +16,10 @@ const NODE_ENV = process.env.NODE_ENV || "development";
 dotenv_1.default.config({ path: `.env.${NODE_ENV}` });
 class UserService {
     static async signUp(req, data) {
-        _helper_1.ValidateFields.emailValidation(req, data.email);
-        _helper_1.ValidateFields.stringRequired(req, data.role, "Role");
+        _validations_1.default.emailValidation(req, data.email);
+        _validations_1.default.stringRequired(req, data.role, "Role");
         const passwordSchema = joi_1.default.string().min(8).max(30).required();
-        _helper_1.ValidateFields.passwordValidation(req, data.password, passwordSchema);
+        _validations_1.default.passwordValidation(req, data.password, passwordSchema);
         if (data.password !== data.confirmPassword) {
             if (req.file) {
                 fs_1.default.unlinkSync(req.file.path);
@@ -41,7 +41,7 @@ class UserService {
         if (req.file) {
             await (0, _utils_1.uploadFile)(req.file.path);
             fs_1.default.unlinkSync(req.file.path);
-            const profile = `https://tarotcardtestjob.s3.ap-south-1.amazonaws.com/${req.file.path}`;
+            const profile = process.env.S3_URL + req.file.path;
             responseData = {
                 email: mail,
                 password: hash,
@@ -68,9 +68,9 @@ class UserService {
         };
     }
     static async logIn(req, data) {
-        _helper_1.ValidateFields.emailValidation(req, data.email);
+        _validations_1.default.emailValidation(req, data.email);
         const passwordSchema = joi_1.default.string().required();
-        _helper_1.ValidateFields.passwordValidation(req, data.password, passwordSchema);
+        _validations_1.default.passwordValidation(req, data.password, passwordSchema);
         const email = data.email.toLowerCase();
         const user = await _repo_1.UserRepo.findUser(email);
         if (!user) {
@@ -100,8 +100,8 @@ class UserService {
         return responseData;
     }
     static async updateReaderProfile(req, data) {
-        _helper_1.ValidateFields.stringRequired(req, data.bio, "Bio");
-        _helper_1.ValidateFields.arrayRequired(data.specialities, "Specialities");
+        _validations_1.default.stringRequired(req, data.bio, "Bio");
+        _validations_1.default.arrayRequired(data.specialities, "Specialities");
         const user = await _repo_1.UserRepo.findUserByID(data.id);
         if (user?.dataValues.role !== "Reader") {
             throw new _exceptions_1.UnauthorizedExceptionError(_messages_1.default.wrongUserRole);
@@ -131,21 +131,23 @@ class UserService {
         }
         return responseData;
     }
-    static async getAllReaders(data) {
+    static async getAllReaders(pageNumber, pageSize) {
+        _validations_1.default.queryStringRequired(pageNumber, "Page number");
+        _validations_1.default.queryStringRequired(pageSize, "Page size");
         const readerCount = await _repo_1.UserRepo.countAllReaders();
-        const limit = data.pageSize;
-        const offset = (data.pageNumber - 1) * limit;
+        const limit = pageSize;
+        const offset = (pageNumber - 1) * limit;
         const response = await _repo_1.UserRepo.getPaginatedReaders(offset, limit);
         return {
             ...response,
             meta: {
-                totalPages: Math.ceil(readerCount.count / data.pageSize),
-                currentPage: data.pageNumber,
-                previousPage: data.pageNumber === 1 ? null : data.pageNumber - 1,
-                nextPage: data.pageNumber + 1 > Math.ceil(readerCount.count / data.pageSize)
+                totalPages: Math.ceil(readerCount.count / pageSize),
+                currentPage: pageNumber,
+                previousPage: pageNumber === 1 ? null : pageNumber - 1,
+                nextPage: pageNumber + 1 > Math.ceil(readerCount.count / pageSize)
                     ? null
-                    : data.pageNumber + 1,
-                pageSize: data.pageSize,
+                    : pageNumber + 1,
+                pageSize,
             },
         };
     }

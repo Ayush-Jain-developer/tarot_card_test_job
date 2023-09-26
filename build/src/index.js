@@ -12,7 +12,7 @@ const dotenv_1 = __importDefault(require("dotenv"));
 const cors_1 = __importDefault(require("cors"));
 const connection_1 = require("@database/connection");
 const models_1 = require("@database/models");
-const _routes_1 = __importDefault(require("@routes"));
+const _routes_1 = require("@routes");
 const _messages_1 = __importDefault(require("@messages"));
 const NODE_ENV = process.env.NODE_ENV || "development";
 dotenv_1.default.config({ path: `.env.${NODE_ENV}` });
@@ -34,7 +34,7 @@ const corsOptions = {
 app.use((0, cors_1.default)(corsOptions));
 // app.use(express.urlencoded({ extended: true }));
 app.use(express_1.default.json());
-app.use(_routes_1.default);
+app.use(_routes_1.userRoute, _routes_1.ratingRoute);
 server.listen(port, () => {
     console.log(_messages_1.default.server + port);
 });

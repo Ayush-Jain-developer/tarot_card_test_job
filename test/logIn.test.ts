@@ -1,4 +1,4 @@
-import UserService from "@service";
+import { UserService } from "@service";
 import { Request } from "express";
 import {
   BadRequestExceptionError,

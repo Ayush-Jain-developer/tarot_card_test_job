@@ -22,5 +22,7 @@ class Messages {
     static tokensGenerated = "Access and Refresh tokens generated successfully";
     static userData = "User Data";
     static readerPaginatedData = "Reader data for the given page number and page size";
+    static invalidFileType = "Invalid file type. Only JPEG, JPG, PNG, and SVG files are allowed";
+    static userRating = "User review and rating saved successfully";
 }
 exports.default = Messages;

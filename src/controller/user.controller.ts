@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import UserService from "@service";
+import { UserService } from "@service";
 import { apiResponse } from "@helper";
 import { ReaderBioInterface, UserInterface } from "@interfaces";
 import Messages from "@messages";
@@ -66,9 +66,12 @@ class UserController {
   }
 
   static async getAllReaders(req: Request, res: Response, next: NextFunction) {
-    const data: { pageNumber: number; pageSize: number } = req.body;
+    const { pageNumber, pageSize } = req.query;
     try {
-      const response = await UserService.getAllReaders(data);
+      const response = await UserService.getAllReaders(
+        Number(pageNumber),
+        Number(pageSize),
+      );
       const message = Messages.readerPaginatedData;
       return apiResponse(res, 200, message, response);
     } catch (error) {

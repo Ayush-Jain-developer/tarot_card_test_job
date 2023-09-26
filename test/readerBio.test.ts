@@ -1,4 +1,4 @@
-import UserService from "@service";
+import { UserService } from "@service";
 import { ReaderBioRepo, UserRepo } from "@repo";
 import {
   BadRequestExceptionError,

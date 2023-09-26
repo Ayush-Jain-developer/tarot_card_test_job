@@ -26,15 +26,16 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const _service_1 = __importDefault(require("@service"));
+const _service_1 = require("@service");
 const _exceptions_1 = require("@exceptions");
 const _repo_1 = require("@repo");
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const utils = __importStar(require("@utils"));
 const _messages_1 = __importDefault(require("@messages"));
 const fs_1 = __importDefault(require("fs"));
+const models_1 = require("@database/models");
 const actualMockData = {
-    email: "john@gmail.com",
+    email: "John@gmail.com",
     password: "12345678",
     confirmPassword: "12345678",
     firstName: "John",
@@ -109,6 +110,21 @@ const passwordUnMatchMockData = {
     lastName: "Doe",
     role: "Reader",
 };
+const mockCreateDataWithProfile = {
+    email: "john@gmail.com",
+    password: "$2b$10$yCmy4S009zirBbstArf8d.1XveXJIfmV7xplACID.XI5n/uSMJokK",
+    firstName: "John",
+    lastName: "Doe",
+    role: "Reader",
+    profilePicture: "https://tarotcardtestjob.s3.ap-south-1.amazonaws.com/path/to/file",
+};
+const mockCreateData = {
+    email: "john@gmail.com",
+    password: "$2b$10$yCmy4S009zirBbstArf8d.1XveXJIfmV7xplACID.XI5n/uSMJokK",
+    firstName: "John",
+    lastName: "Doe",
+    role: "Reader",
+};
 describe("signUp API", () => {
     test("should return error for email", async () => {
         fs_1.default.unlinkSync = jest.fn().mockImplementation(() => true);
@@ -118,7 +134,7 @@ describe("signUp API", () => {
                     path: "path/to/file",
                 },
             };
-            await _service_1.default.signUp(mockReq, wrongEmailMockData);
+            await _service_1.UserService.signUp(mockReq, wrongEmailMockData);
         }
         catch (error) {
             expect(fs_1.default.unlinkSync).toBeCalledTimes(1);
@@ -137,7 +153,7 @@ describe("signUp API", () => {
                     path: "path/to/file",
                 },
             };
-            await _service_1.default.signUp(mockReq, actualMockData);
+            await _service_1.UserService.signUp(mockReq, actualMockData);
         }
         catch (error) {
             expect(fs_1.default.unlinkSync).toBeCalledTimes(1);
@@ -156,7 +172,7 @@ describe("signUp API", () => {
                     path: "path/to/file",
                 },
             };
-            await _service_1.default.signUp(mockReq, noRoleMockData);
+            await _service_1.UserService.signUp(mockReq, noRoleMockData);
         }
         catch (error) {
             expect(fs_1.default.unlinkSync).toBeCalledTimes(1);
@@ -175,7 +191,7 @@ describe("signUp API", () => {
                     path: "path/to/file",
                 },
             };
-            await _service_1.default.signUp(mockReq, noPasswordMockData);
+            await _service_1.UserService.signUp(mockReq, noPasswordMockData);
         }
         catch (error) {
             expect(fs_1.default.unlinkSync).toBeCalledTimes(1);
@@ -194,7 +210,7 @@ describe("signUp API", () => {
                     path: "path/to/file",
                 },
             };
-            await _service_1.default.signUp(mockReq, shortPasswordMockData);
+            await _service_1.UserService.signUp(mockReq, shortPasswordMockData);
         }
         catch (error) {
             expect(fs_1.default.unlinkSync).toBeCalledTimes(1);
@@ -213,7 +229,7 @@ describe("signUp API", () => {
                     path: "path/to/file",
                 },
             };
-            await _service_1.default.signUp(mockReq, passwordUnMatchMockData);
+            await _service_1.UserService.signUp(mockReq, passwordUnMatchMockData);
         }
         catch (error) {
             expect(fs_1.default.unlinkSync).toBeCalledTimes(1);
@@ -222,18 +238,19 @@ describe("signUp API", () => {
             expect(error.message).toBe(_messages_1.default.passwordNotMatch);
         }
     });
-    beforeEach(() => { });
     test("should return user with profilePicture and token", async () => {
-        const mockFindUser = jest.fn();
-        _repo_1.UserRepo.findUser = mockFindUser.mockResolvedValue(null);
-        const mockCreateUser = jest.fn();
-        _repo_1.UserRepo.createUser = mockCreateUser.mockResolvedValue({
-            dataValues: returnMockData,
-        });
-        const mockCreateReaderBio = jest.fn();
-        _repo_1.ReaderBioRepo.createReaderBio = mockCreateReaderBio.mockResolvedValue(null);
+        const spyFindUser = jest.spyOn(_repo_1.UserRepo, "findUser");
+        models_1.models.user.findOne = jest.fn().mockResolvedValue(null);
+        const spyCreateUser = jest.spyOn(_repo_1.UserRepo, "createUser");
+        models_1.models.user.create = jest
+            .fn()
+            .mockResolvedValue({ dataValues: returnMockDataWithProfile });
+        const spyReaderBio = jest.spyOn(_repo_1.ReaderBioRepo, "createReaderBio");
+        models_1.models.readerBio.create = jest.fn().mockResolvedValue(null);
         bcrypt_1.default.genSalt = jest.fn();
-        bcrypt_1.default.hash = jest.fn();
+        bcrypt_1.default.hash = jest
+            .fn()
+            .mockResolvedValue("$2b$10$yCmy4S009zirBbstArf8d.1XveXJIfmV7xplACID.XI5n/uSMJokK");
         utils.Jwt.createTokens = jest.fn().mockReturnValue(mockTokens);
         const spyUpload = jest.spyOn(utils, "uploadFile");
         fs_1.default.readFileSync = jest.fn().mockImplementation(() => "Mock File Data");
@@ -243,7 +260,19 @@ describe("signUp API", () => {
                 path: "path/to/file",
             },
         };
-        const response = await _service_1.default.signUp(mockReq, actualMockData);
+        const response = await _service_1.UserService.signUp(mockReq, actualMockData);
+        expect(spyFindUser).toHaveBeenCalledTimes(1);
+        // expect(models.user.findOne).toBeCalledWith({
+        //   where: {
+        //     email: "john@gmail.com",
+        //   },
+        // });
+        expect(spyCreateUser).toHaveBeenCalledTimes(1);
+        expect(models_1.models.user.create).toBeCalledWith(mockCreateDataWithProfile);
+        expect(spyReaderBio).toHaveBeenCalledTimes(1);
+        expect(models_1.models.readerBio.create).toBeCalledWith({
+            id: returnMockDataWithProfile.id,
+        });
         expect(spyUpload).toBeCalledTimes(1);
         expect(spyUpload).toBeCalledWith("path/to/file");
         expect(fs_1.default.readFileSync).toBeCalled();
@@ -252,8 +281,7 @@ describe("signUp API", () => {
         expect(fs_1.default.unlinkSync).toBeCalledWith("path/to/file");
         expect(bcrypt_1.default.genSalt).toHaveBeenCalled();
         expect(bcrypt_1.default.hash).toHaveBeenCalled();
-        expect(_repo_1.ReaderBioRepo.createReaderBio).toHaveBeenCalled();
-        expect(response.profilePicture).toBe(null);
+        expect(response.profilePicture).not.toBe(null);
         expect(response).toStrictEqual({
             ...returnMockDataWithProfile,
             ...mockTokens,
@@ -261,26 +289,33 @@ describe("signUp API", () => {
         });
     });
     test("should return user with token", async () => {
-        const mockFindUser = jest.fn();
-        _repo_1.UserRepo.findUser = mockFindUser.mockResolvedValue(null);
-        const mockCreateUser = jest.fn();
-        _repo_1.UserRepo.createUser = mockCreateUser.mockResolvedValue({
-            dataValues: returnMockData,
-        });
-        const mockCreateReaderBio = jest.fn();
-        _repo_1.ReaderBioRepo.createReaderBio = mockCreateReaderBio.mockResolvedValue(null);
+        const spyFindUser = jest.spyOn(_repo_1.UserRepo, "findUser");
+        models_1.models.user.findOne = jest.fn().mockResolvedValue(null);
+        const spyCreateUser = jest.spyOn(_repo_1.UserRepo, "createUser");
+        models_1.models.user.create = jest
+            .fn()
+            .mockResolvedValue({ dataValues: returnMockData });
+        const spyReaderBio = jest.spyOn(_repo_1.ReaderBioRepo, "createReaderBio");
+        models_1.models.readerBio.create = jest.fn().mockResolvedValue(null);
         bcrypt_1.default.genSalt = jest.fn();
-        bcrypt_1.default.hash = jest.fn();
+        bcrypt_1.default.hash = jest
+            .fn()
+            .mockResolvedValue("$2b$10$yCmy4S009zirBbstArf8d.1XveXJIfmV7xplACID.XI5n/uSMJokK");
         utils.Jwt.createTokens = jest.fn().mockReturnValue(mockTokens);
         const mockReq = {};
         const spyUpload = jest.spyOn(utils, "uploadFile");
         const spyFs = jest.spyOn(fs_1.default, "readFileSync");
-        const response = await _service_1.default.signUp(mockReq, actualMockData);
+        const response = await _service_1.UserService.signUp(mockReq, actualMockData);
+        expect(spyFindUser).toBeCalledTimes(1);
+        // expect(models.user.findOne).toBeCalled();
+        expect(spyCreateUser).toBeCalledTimes(1);
+        expect(models_1.models.user.create).toBeCalledWith(mockCreateData);
+        expect(spyReaderBio).toBeCalledTimes(1);
+        expect(models_1.models.readerBio.create).toBeCalledWith({ id: returnMockData.id });
         expect(spyUpload).not.toBeCalled();
         expect(spyFs).not.toBeCalled();
         expect(bcrypt_1.default.genSalt).toHaveBeenCalled();
         expect(bcrypt_1.default.hash).toHaveBeenCalled();
-        expect(_repo_1.ReaderBioRepo.createReaderBio).toHaveBeenCalled();
         expect(response.profilePicture).toBe(null);
         expect(response).toStrictEqual({
             ...returnMockData,

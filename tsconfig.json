@@ -20,7 +20,8 @@
       "@repo" : ["repo"],
       "@routes" : ["routes"],
       "@service" : ["service"],
-      "@utils" : ["utils"]
+      "@utils" : ["utils"],
+      "@validations": ["validations"]
     }
   },
   "include": ["src/**/*.ts", "test/**/*.ts"]

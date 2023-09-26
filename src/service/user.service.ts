@@ -11,7 +11,7 @@ import {
   NotFoundExceptionError,
   UnauthorizedExceptionError,
 } from "@exceptions";
-import { ValidateFields } from "@helper";
+import ValidateFields from "@validations";
 import bcrypt from "bcrypt";
 import { UserRepo, ReaderBioRepo } from "@repo";
 import Messages from "@messages";
@@ -163,22 +163,24 @@ class UserService {
     return responseData;
   }
 
-  static async getAllReaders(data: { pageNumber: number; pageSize: number }) {
+  static async getAllReaders(pageNumber: number, pageSize: number) {
+    ValidateFields.queryStringRequired(pageNumber, "Page number");
+    ValidateFields.queryStringRequired(pageSize, "Page size");
     const readerCount = await UserRepo.countAllReaders();
-    const limit = data.pageSize;
-    const offset = (data.pageNumber - 1) * limit;
+    const limit = pageSize;
+    const offset = (pageNumber - 1) * limit;
     const response = await UserRepo.getPaginatedReaders(offset, limit);
     return {
       ...response,
       meta: {
-        totalPages: Math.ceil(readerCount.count / data.pageSize),
-        currentPage: data.pageNumber,
-        previousPage: data.pageNumber === 1 ? null : data.pageNumber - 1,
+        totalPages: Math.ceil(readerCount.count / pageSize),
+        currentPage: pageNumber,
+        previousPage: pageNumber === 1 ? null : pageNumber - 1,
         nextPage:
-          data.pageNumber + 1 > Math.ceil(readerCount.count / data.pageSize)
+          pageNumber + 1 > Math.ceil(readerCount.count / pageSize)
             ? null
-            : data.pageNumber + 1,
-        pageSize: data.pageSize,
+            : pageNumber + 1,
+        pageSize,
       },
     };
   }

@@ -1,3 +1,4 @@
 import UserService from "./user.service";
+import RatingService from "./rating.service";
 
-export default UserService;
+export { UserService, RatingService };

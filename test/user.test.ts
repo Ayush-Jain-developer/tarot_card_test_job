@@ -1,7 +1,7 @@
 import { BadRequestExceptionError } from "@exceptions";
 import Messages from "@messages";
 import { ReaderBioRepo, UserRepo } from "@repo";
-import UserService from "@service";
+import { UserService } from "@service";
 
 const mockReaderData = {
   id: "4d03f61c-9912-418a-8809-91fbb73ceb05",

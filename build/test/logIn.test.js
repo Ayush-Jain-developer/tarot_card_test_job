@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const _service_1 = __importDefault(require("@service"));
+const _service_1 = require("@service");
 const _exceptions_1 = require("@exceptions");
 const _repo_1 = require("@repo");
 const _utils_1 = require("@utils");
@@ -79,7 +79,7 @@ describe("logIn API", () => {
         fs_1.default.unlinkSync = jest.fn().mockImplementation(() => true);
         try {
             const mockReq = {};
-            await _service_1.default.logIn(mockReq, wrongEmailMockData);
+            await _service_1.UserService.logIn(mockReq, wrongEmailMockData);
         }
         catch (error) {
             expect(fs_1.default.unlinkSync).not.toBeCalled();
@@ -91,7 +91,7 @@ describe("logIn API", () => {
         fs_1.default.unlinkSync = jest.fn().mockImplementation(() => true);
         try {
             const mockReq = {};
-            await _service_1.default.logIn(mockReq, noPasswordMockData);
+            await _service_1.UserService.logIn(mockReq, noPasswordMockData);
         }
         catch (error) {
             expect(fs_1.default.unlinkSync).not.toBeCalled();
@@ -104,7 +104,7 @@ describe("logIn API", () => {
         _repo_1.UserRepo.findUser = mockFindUser.mockResolvedValue(null);
         try {
             const mockReq = {};
-            await _service_1.default.logIn(mockReq, actualMockData);
+            await _service_1.UserService.logIn(mockReq, actualMockData);
         }
         catch (error) {
             expect(error).toBeInstanceOf(_exceptions_1.NotFoundExceptionError);
@@ -118,7 +118,7 @@ describe("logIn API", () => {
         });
         try {
             const mockReq = {};
-            await _service_1.default.logIn(mockReq, wrongPasswordMockData);
+            await _service_1.UserService.logIn(mockReq, wrongPasswordMockData);
         }
         catch (error) {
             expect(error).toBeInstanceOf(_exceptions_1.UnauthorizedExceptionError);
@@ -137,7 +137,7 @@ describe("logIn API", () => {
         _repo_1.ReaderBioRepo.findReaderBioById =
             mockReaderBio.mockResolvedValue(mockReaderBioData);
         const mockReq = {};
-        const response = await _service_1.default.logIn(mockReq, actualMockData);
+        const response = await _service_1.UserService.logIn(mockReq, actualMockData);
         expect(spyBcrypt).toHaveBeenCalledTimes(1);
         expect(spyBcrypt).toHaveBeenCalledWith(actualMockData.password, mockUserData.password);
         expect(response.accessToken).toBe(mockTokens.accessToken);
@@ -155,7 +155,7 @@ describe("logIn API", () => {
         const mockReaderBio = jest.fn();
         _repo_1.ReaderBioRepo.findReaderBioById = mockReaderBio.mockResolvedValue(mockUnUpdatedReaderBioData);
         const mockReq = {};
-        const response = await _service_1.default.logIn(mockReq, actualMockData);
+        const response = await _service_1.UserService.logIn(mockReq, actualMockData);
         expect(spyBcrypt).toHaveBeenCalledTimes(1);
         expect(spyBcrypt).toHaveBeenCalledWith(actualMockData.password, mockUserData.password);
         expect(response.accessToken).toBe(mockTokens.accessToken);
@@ -171,7 +171,7 @@ describe("logIn API", () => {
         const mockCreateToken = jest.fn();
         _utils_1.Jwt.createTokens = mockCreateToken.mockReturnValue(mockTokens);
         const mockReq = {};
-        const response = await _service_1.default.logIn(mockReq, actualMockData);
+        const response = await _service_1.UserService.logIn(mockReq, actualMockData);
         expect(spyBcrypt).toHaveBeenCalledTimes(1);
         expect(spyBcrypt).toHaveBeenCalledWith(actualMockData.password, mockUserDataForClient.password);
         expect(response.accessToken).toBe(mockTokens.accessToken);

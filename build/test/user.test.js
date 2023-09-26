@@ -6,7 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const _exceptions_1 = require("@exceptions");
 const _messages_1 = __importDefault(require("@messages"));
 const _repo_1 = require("@repo");
-const _service_1 = __importDefault(require("@service"));
+const _service_1 = require("@service");
 const mockReaderData = {
     id: "4d03f61c-9912-418a-8809-91fbb73ceb05",
     email: "john@gmail.com",
@@ -70,7 +70,7 @@ describe("user API", () => {
         const mockUser = jest.fn();
         _repo_1.UserRepo.findUserByID = mockUser.mockResolvedValue(null);
         try {
-            await _service_1.default.getUser("123");
+            await _service_1.UserService.getUser("123");
         }
         catch (error) {
             expect(error).toBeInstanceOf(_exceptions_1.BadRequestExceptionError);
@@ -86,7 +86,7 @@ describe("user API", () => {
         _repo_1.ReaderBioRepo.findReaderBioById = mockBio.mockResolvedValue({
             dataValues: mockReaderBio,
         });
-        const response = await _service_1.default.getUser("4d03f61c-9912-418a-8809-91fbb73ceb05");
+        const response = await _service_1.UserService.getUser("4d03f61c-9912-418a-8809-91fbb73ceb05");
         expect(response.id).toBe("4d03f61c-9912-418a-8809-91fbb73ceb05");
         expect(response).toStrictEqual(mockReaderResponse);
     });
@@ -95,7 +95,7 @@ describe("user API", () => {
         _repo_1.UserRepo.findUserByID = mockUser.mockResolvedValue({
             dataValues: mockClientData,
         });
-        const response = await _service_1.default.getUser("4d03f61c-9912-418a-8809-91fbb73ceb05");
+        const response = await _service_1.UserService.getUser("4d03f61c-9912-418a-8809-91fbb73ceb05");
         expect(response.id).toBe("4d03f61c-9912-418a-8809-91fbb73ceb05");
         expect(response).toStrictEqual(mockClientResponse);
     });
