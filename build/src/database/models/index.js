@@ -11,7 +11,8 @@ const user_model_1 = __importDefault(require("@database/models/user.model"));
 const reader_bio_model_1 = __importDefault(require("@database/models/reader_bio.model"));
 const allotment_model_1 = __importDefault(require("./allotment.model"));
 const ratings_model_1 = __importDefault(require("./ratings.model"));
-exports.models = { user: user_model_1.default, readerBio: reader_bio_model_1.default, allotment: allotment_model_1.default, ratings: ratings_model_1.default };
+const items_model_1 = __importDefault(require("./items.model"));
+exports.models = { user: user_model_1.default, readerBio: reader_bio_model_1.default, allotment: allotment_model_1.default, ratings: ratings_model_1.default, items: items_model_1.default };
 const databaseSync = async () => {
     try {
         await connection_1.sequelize.sync({ force: true });

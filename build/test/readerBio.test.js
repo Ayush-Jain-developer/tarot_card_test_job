@@ -71,11 +71,9 @@ describe("Reader bio API", () => {
     test("should return error for no bio", async () => {
         fs_1.default.unlinkSync = jest.fn().mockImplementation(() => true);
         try {
-            const mockReq = {};
-            await _service_1.UserService.updateReaderProfile(mockReq, noBioMockData);
+            await _service_1.UserService.updateReaderProfile(noBioMockData);
         }
         catch (error) {
-            expect(fs_1.default.unlinkSync).not.toBeCalled();
             expect(error).toBeInstanceOf(_exceptions_1.BadRequestExceptionError);
             expect(error.message).toBe("Bio is not allowed to be empty");
         }
@@ -83,11 +81,9 @@ describe("Reader bio API", () => {
     test("should return error for no specialities", async () => {
         fs_1.default.unlinkSync = jest.fn().mockImplementation(() => true);
         try {
-            const mockReq = {};
-            await _service_1.UserService.updateReaderProfile(mockReq, noSpecialitiesMockData);
+            await _service_1.UserService.updateReaderProfile(noSpecialitiesMockData);
         }
         catch (error) {
-            expect(fs_1.default.unlinkSync).not.toBeCalled();
             expect(error).toBeInstanceOf(_exceptions_1.BadRequestExceptionError);
             expect(error.message).toBe("Specialities must contain at least 1 items");
         }
@@ -98,8 +94,7 @@ describe("Reader bio API", () => {
             dataValues: mockWrongRoleUserData,
         });
         try {
-            const mockReq = {};
-            await _service_1.UserService.updateReaderProfile(mockReq, mockDataForUpdate);
+            await _service_1.UserService.updateReaderProfile(mockDataForUpdate);
         }
         catch (error) {
             expect(error).toBeInstanceOf(_exceptions_1.UnauthorizedExceptionError);
@@ -114,8 +109,7 @@ describe("Reader bio API", () => {
         const mockUpdateReaderProfile = jest.fn();
         _repo_1.ReaderBioRepo.updateReaderProfile =
             mockUpdateReaderProfile.mockResolvedValue(updatedMockData);
-        const mockReq = {};
-        const response = await _service_1.UserService.updateReaderProfile(mockReq, mockDataForUpdate);
+        const response = await _service_1.UserService.updateReaderProfile(mockDataForUpdate);
         expect(response).toStrictEqual(updatedMockData);
     });
 });

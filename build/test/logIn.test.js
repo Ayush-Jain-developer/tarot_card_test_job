@@ -78,11 +78,9 @@ describe("logIn API", () => {
     test("should return error for invalid email", async () => {
         fs_1.default.unlinkSync = jest.fn().mockImplementation(() => true);
         try {
-            const mockReq = {};
-            await _service_1.UserService.logIn(mockReq, wrongEmailMockData);
+            await _service_1.UserService.logIn(wrongEmailMockData);
         }
         catch (error) {
-            expect(fs_1.default.unlinkSync).not.toBeCalled();
             expect(error).toBeInstanceOf(_exceptions_1.BadRequestExceptionError);
             expect(error.message).toBe("Email must be a valid email");
         }
@@ -90,11 +88,9 @@ describe("logIn API", () => {
     test("should return error for no password", async () => {
         fs_1.default.unlinkSync = jest.fn().mockImplementation(() => true);
         try {
-            const mockReq = {};
-            await _service_1.UserService.logIn(mockReq, noPasswordMockData);
+            await _service_1.UserService.logIn(noPasswordMockData);
         }
         catch (error) {
-            expect(fs_1.default.unlinkSync).not.toBeCalled();
             expect(error).toBeInstanceOf(_exceptions_1.BadRequestExceptionError);
             expect(error.message).toBe("Password is not allowed to be empty");
         }
@@ -103,8 +99,7 @@ describe("logIn API", () => {
         const mockFindUser = jest.fn();
         _repo_1.UserRepo.findUser = mockFindUser.mockResolvedValue(null);
         try {
-            const mockReq = {};
-            await _service_1.UserService.logIn(mockReq, actualMockData);
+            await _service_1.UserService.logIn(actualMockData);
         }
         catch (error) {
             expect(error).toBeInstanceOf(_exceptions_1.NotFoundExceptionError);
@@ -117,8 +112,7 @@ describe("logIn API", () => {
             dataValues: mockUserData,
         });
         try {
-            const mockReq = {};
-            await _service_1.UserService.logIn(mockReq, wrongPasswordMockData);
+            await _service_1.UserService.logIn(wrongPasswordMockData);
         }
         catch (error) {
             expect(error).toBeInstanceOf(_exceptions_1.UnauthorizedExceptionError);
@@ -136,8 +130,7 @@ describe("logIn API", () => {
         const mockReaderBio = jest.fn();
         _repo_1.ReaderBioRepo.findReaderBioById =
             mockReaderBio.mockResolvedValue(mockReaderBioData);
-        const mockReq = {};
-        const response = await _service_1.UserService.logIn(mockReq, actualMockData);
+        const response = await _service_1.UserService.logIn(actualMockData);
         expect(spyBcrypt).toHaveBeenCalledTimes(1);
         expect(spyBcrypt).toHaveBeenCalledWith(actualMockData.password, mockUserData.password);
         expect(response.accessToken).toBe(mockTokens.accessToken);
@@ -154,8 +147,7 @@ describe("logIn API", () => {
         _utils_1.Jwt.createTokens = mockCreateToken.mockReturnValue(mockTokens);
         const mockReaderBio = jest.fn();
         _repo_1.ReaderBioRepo.findReaderBioById = mockReaderBio.mockResolvedValue(mockUnUpdatedReaderBioData);
-        const mockReq = {};
-        const response = await _service_1.UserService.logIn(mockReq, actualMockData);
+        const response = await _service_1.UserService.logIn(actualMockData);
         expect(spyBcrypt).toHaveBeenCalledTimes(1);
         expect(spyBcrypt).toHaveBeenCalledWith(actualMockData.password, mockUserData.password);
         expect(response.accessToken).toBe(mockTokens.accessToken);
@@ -170,8 +162,7 @@ describe("logIn API", () => {
         const spyBcrypt = jest.spyOn(bcrypt_1.default, "compare");
         const mockCreateToken = jest.fn();
         _utils_1.Jwt.createTokens = mockCreateToken.mockReturnValue(mockTokens);
-        const mockReq = {};
-        const response = await _service_1.UserService.logIn(mockReq, actualMockData);
+        const response = await _service_1.UserService.logIn(actualMockData);
         expect(spyBcrypt).toHaveBeenCalledTimes(1);
         expect(spyBcrypt).toHaveBeenCalledWith(actualMockData.password, mockUserDataForClient.password);
         expect(response.accessToken).toBe(mockTokens.accessToken);

@@ -7,7 +7,7 @@ import dotenv from "dotenv";
 import cors from "cors";
 import { dbConnection } from "@database/connection";
 import { databaseSync } from "@database/models";
-import { userRoute, ratingRoute } from "@routes";
+import { userRoute, ratingRoute, productRoute } from "@routes";
 import Messages from "@messages";
 
 const NODE_ENV = process.env.NODE_ENV || "development";
@@ -34,7 +34,7 @@ const corsOptions = {
 app.use(cors(corsOptions));
 // app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-app.use(userRoute, ratingRoute);
+app.use(userRoute, ratingRoute, productRoute);
 
 server.listen(port, () => {
   console.log(Messages.server + port);

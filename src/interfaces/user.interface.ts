@@ -7,6 +7,7 @@ interface UserInterface {
   firstName: string;
   lastName: string;
   role: string;
+  stripeCustomerId?: string;
   createdAt?: Date;
   updatedAt?: Date;
   deletedAt?: Date | null;

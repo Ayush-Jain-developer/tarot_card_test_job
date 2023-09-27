@@ -24,5 +24,6 @@ class Messages {
     static readerPaginatedData = "Reader data for the given page number and page size";
     static invalidFileType = "Invalid file type. Only JPEG, JPG, PNG, and SVG files are allowed";
     static userRating = "User review and rating saved successfully";
+    static ratingGiven = "Your rating has already been saved for the given user";
 }
 exports.default = Messages;

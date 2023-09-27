@@ -5,22 +5,18 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const joi_1 = __importDefault(require("joi"));
 const _exceptions_1 = require("@exceptions");
-const fs_1 = __importDefault(require("fs"));
 const _helper_1 = require("@helper");
 class ValidateFields {
-    static stringRequired(req, field, word) {
+    static stringRequired(field, word) {
         const schema = joi_1.default.string().required();
         const validation = schema.validate(field);
         if (validation.error) {
             const message = (0, _helper_1.errorMessage)(word, validation.error.details[0].message);
-            if (req.file) {
-                fs_1.default.unlinkSync(req.file.path);
-            }
             throw new _exceptions_1.BadRequestExceptionError(message);
         }
     }
     static integerRequired(field, word) {
-        const schema = joi_1.default.number().integer().min(1).required();
+        const schema = joi_1.default.number().integer().min(1).max(5).required();
         const validation = schema.validate(field);
         if (validation.error) {
             const message = (0, _helper_1.errorMessage)(word, validation.error.details[0].message);
@@ -43,24 +39,18 @@ class ValidateFields {
             throw new _exceptions_1.BadRequestExceptionError(message);
         }
     }
-    static emailValidation(req, email) {
+    static emailValidation(email) {
         const schema = joi_1.default.string().email().required();
         const validation = schema.validate(email);
         if (validation.error) {
             const message = (0, _helper_1.errorMessage)("Email", validation.error.details[0].message);
-            if (req.file) {
-                fs_1.default.unlinkSync(req.file.path);
-            }
             throw new _exceptions_1.BadRequestExceptionError(message);
         }
     }
-    static passwordValidation(req, password, schema) {
+    static passwordValidation(password, schema) {
         const validation = schema.validate(password);
         if (validation.error) {
             const message = (0, _helper_1.errorMessage)("Password", validation.error.details[0].message);
-            if (req.file) {
-                fs_1.default.unlinkSync(req.file.path);
-            }
             throw new _exceptions_1.BadRequestExceptionError(message);
         }
     }

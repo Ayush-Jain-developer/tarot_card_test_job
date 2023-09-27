@@ -7,7 +7,7 @@ class RatingController {
   static async createRating(req: Request, res: Response, next: NextFunction) {
     const data = req.body;
     try {
-      const response = await RatingService.createRating(req, data);
+      const response = await RatingService.createRating(data);
       const message = Messages.userRating;
       return apiResponse(res, 200, message, response);
     } catch (error: any) {

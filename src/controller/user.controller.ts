@@ -21,7 +21,7 @@ class UserController {
   static async logIn(req: Request, res: Response, next: NextFunction) {
     const data: { email: string; password: string } = req.body;
     try {
-      const response = await UserService.logIn(req, data);
+      const response = await UserService.logIn(data);
       const message = Messages.loggedIn;
       return apiResponse(res, 200, message, response);
     } catch (error: any) {
@@ -36,7 +36,7 @@ class UserController {
   ) {
     const data: ReaderBioInterface = req.body;
     try {
-      const response = await UserService.updateReaderProfile(req, data);
+      const response = await UserService.updateReaderProfile(data);
       const message = Messages.readerBioCreated;
       return apiResponse(res, 200, message, response[1][0]);
     } catch (error) {

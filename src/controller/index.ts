@@ -1,3 +1,5 @@
 import UserController from "./user.controller";
+import ProductsController from "./product.controller";
+import RatingController from "./rating.controller";
 
-export default UserController;
+export { UserController, RatingController, ProductsController };

@@ -31,6 +31,9 @@ User.init(
       type: DataTypes.ENUM("Reader", "Client"),
       allowNull: false,
     },
+    stripeCustomerId: {
+      type: DataTypes.STRING,
+    },
   },
   {
     sequelize,

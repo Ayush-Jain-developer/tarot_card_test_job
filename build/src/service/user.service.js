@@ -3,6 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+/* eslint-disable import/no-extraneous-dependencies */
 const joi_1 = __importDefault(require("joi"));
 const fs_1 = __importDefault(require("fs"));
 const _exceptions_1 = require("@exceptions");
@@ -12,14 +13,42 @@ const _repo_1 = require("@repo");
 const _messages_1 = __importDefault(require("@messages"));
 const _utils_1 = require("@utils");
 const dotenv_1 = __importDefault(require("dotenv"));
+const _helper_1 = require("@helper");
+const stripe_1 = __importDefault(require("stripe"));
 const NODE_ENV = process.env.NODE_ENV || "development";
 dotenv_1.default.config({ path: `.env.${NODE_ENV}` });
+const stripe = new stripe_1.default(process.env.STRIPE_KEY, {
+    apiVersion: "2023-08-16",
+});
 class UserService {
     static async signUp(req, data) {
-        _validations_1.default.emailValidation(req, data.email);
-        _validations_1.default.stringRequired(req, data.role, "Role");
+        const schema = joi_1.default.string().email().required();
+        const validation = schema.validate(data.email);
+        if (validation.error) {
+            const message = (0, _helper_1.errorMessage)("Email", validation.error.details[0].message);
+            if (req.file) {
+                fs_1.default.unlinkSync(req.file.path);
+            }
+            throw new _exceptions_1.BadRequestExceptionError(message);
+        }
+        const StringSchemachema = joi_1.default.string().required();
+        const stringValidation = StringSchemachema.validate(data.role);
+        if (stringValidation.error) {
+            const message = (0, _helper_1.errorMessage)("Role", stringValidation.error.details[0].message);
+            if (req.file) {
+                fs_1.default.unlinkSync(req.file.path);
+            }
+            throw new _exceptions_1.BadRequestExceptionError(message);
+        }
         const passwordSchema = joi_1.default.string().min(8).max(30).required();
-        _validations_1.default.passwordValidation(req, data.password, passwordSchema);
+        const passwordValidation = passwordSchema.validate(data.password);
+        if (passwordValidation.error) {
+            const message = (0, _helper_1.errorMessage)("Password", passwordValidation.error.details[0].message);
+            if (req.file) {
+                fs_1.default.unlinkSync(req.file.path);
+            }
+            throw new _exceptions_1.BadRequestExceptionError(message);
+        }
         if (data.password !== data.confirmPassword) {
             if (req.file) {
                 fs_1.default.unlinkSync(req.file.path);
@@ -38,6 +67,10 @@ class UserService {
         const hash = await bcrypt_1.default.hash(data.password, salt);
         let responseData;
         const { id, email, password, confirmPassword, createdAt, updatedAt, deletedAt, profilePicture, ...userData } = data;
+        const stripeCustomer = await stripe.customers.create({
+            email: mail,
+            name: `${data.firstName} ${data.lastName}`,
+        });
         if (req.file) {
             await (0, _utils_1.uploadFile)(req.file.path);
             fs_1.default.unlinkSync(req.file.path);
@@ -47,6 +80,7 @@ class UserService {
                 password: hash,
                 ...userData,
                 profilePicture: profile,
+                stripeCustomerId: stripeCustomer.id,
             };
         }
         else {
@@ -54,6 +88,7 @@ class UserService {
                 email: mail,
                 password: hash,
                 ...userData,
+                stripeCustomerId: stripeCustomer.id,
             };
         }
         const createdUser = await _repo_1.UserRepo.createUser(responseData);
@@ -67,10 +102,10 @@ class UserService {
             refreshTokenExpiry: _messages_1.default.refreshTokenExpiry,
         };
     }
-    static async logIn(req, data) {
-        _validations_1.default.emailValidation(req, data.email);
+    static async logIn(data) {
+        _validations_1.default.emailValidation(data.email);
         const passwordSchema = joi_1.default.string().required();
-        _validations_1.default.passwordValidation(req, data.password, passwordSchema);
+        _validations_1.default.passwordValidation(data.password, passwordSchema);
         const email = data.email.toLowerCase();
         const user = await _repo_1.UserRepo.findUser(email);
         if (!user) {
@@ -99,8 +134,8 @@ class UserService {
         }
         return responseData;
     }
-    static async updateReaderProfile(req, data) {
-        _validations_1.default.stringRequired(req, data.bio, "Bio");
+    static async updateReaderProfile(data) {
+        _validations_1.default.stringRequired(data.bio, "Bio");
         _validations_1.default.arrayRequired(data.specialities, "Specialities");
         const user = await _repo_1.UserRepo.findUserByID(data.id);
         if (user?.dataValues.role !== "Reader") {

@@ -48,6 +48,11 @@ class Messages {
     "Invalid file type. Only JPEG, JPG, PNG, and SVG files are allowed";
 
   static readonly userRating = "User review and rating saved successfully";
+
+  static readonly ratingGiven =
+    "Your rating has already been saved for the given user";
+
+  static readonly serviceAdded = "New service added successfully";
 }
 
 export default Messages;

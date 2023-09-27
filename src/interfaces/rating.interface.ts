@@ -1,10 +1,8 @@
-type Ratings = 1 | 2 | 3 | 4 | 5;
-
 interface RatingInterface {
   id?: string;
   senderId: string;
   receiverId: string;
-  rating: Ratings;
+  rating: number;
   review?: string;
 }
 

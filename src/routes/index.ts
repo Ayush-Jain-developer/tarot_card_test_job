@@ -1,4 +1,5 @@
 import userRoute from "./user.routes";
 import ratingRoute from "./rating.route";
+import productRoute from "./product.route";
 
-export { userRoute, ratingRoute };
+export { userRoute, ratingRoute, productRoute };

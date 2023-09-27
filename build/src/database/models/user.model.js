@@ -31,6 +31,9 @@ User.init({
         type: sequelize_1.DataTypes.ENUM("Reader", "Client"),
         allowNull: false,
     },
+    stripeCustomerId: {
+        type: sequelize_1.DataTypes.STRING,
+    },
 }, {
     sequelize: connection_1.sequelize,
     modelName: "user",

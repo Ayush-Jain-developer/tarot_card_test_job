@@ -1,25 +1,33 @@
 import Joi from "joi";
 import { BadRequestExceptionError } from "@exceptions";
-import fs from "fs";
-import { Request } from "express";
 import { errorMessage } from "@helper";
 
 class ValidateFields {
-  static stringRequired(req: Request, field: string, word: string) {
+  static stringRequired(field: string, word: string) {
     const schema = Joi.string().required();
     const validation = schema.validate(field);
     if (validation.error) {
       const message = errorMessage(word, validation.error.details[0].message);
-      if (req.file) {
-        fs.unlinkSync(req.file.path);
-      }
       throw new BadRequestExceptionError(message);
     }
   }
 
   static integerRequired(field: number, word: string) {
-    const schema = Joi.number().integer().min(1).required();
+    const schema = Joi.number().integer().min(1).max(5).required();
     const validation = schema.validate(field);
+    if (validation.error) {
+      const message = errorMessage(word, validation.error.details[0].message);
+      throw new BadRequestExceptionError(message);
+    }
+  }
+
+  static decimalRequired(field: number, word: string) {
+    const decimalSchema = Joi.number()
+      .precision(2)
+      .min(0)
+      .max(9999999.99)
+      .required();
+    const validation = decimalSchema.validate(field);
     if (validation.error) {
       const message = errorMessage(word, validation.error.details[0].message);
       throw new BadRequestExceptionError(message);
@@ -44,7 +52,7 @@ class ValidateFields {
     }
   }
 
-  static emailValidation(req: Request, email: string) {
+  static emailValidation(email: string) {
     const schema = Joi.string().email().required();
     const validation = schema.validate(email);
     if (validation.error) {
@@ -52,15 +60,11 @@ class ValidateFields {
         "Email",
         validation.error.details[0].message,
       );
-      if (req.file) {
-        fs.unlinkSync(req.file.path);
-      }
       throw new BadRequestExceptionError(message);
     }
   }
 
   static passwordValidation(
-    req: Request,
     password: string,
     schema: Joi.StringSchema<string>,
   ) {
@@ -70,9 +74,6 @@ class ValidateFields {
         "Password",
         validation.error.details[0].message,
       );
-      if (req.file) {
-        fs.unlinkSync(req.file.path);
-      }
       throw new BadRequestExceptionError(message);
     }
   }

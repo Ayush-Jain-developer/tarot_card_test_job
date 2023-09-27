@@ -5,8 +5,9 @@ import user from "@database/models/user.model";
 import readerBio from "@database/models/reader_bio.model";
 import allotment from "./allotment.model";
 import ratings from "./ratings.model";
+import products from "./product.model";
 
-export const models = { user, readerBio, allotment, ratings };
+export const models = { user, readerBio, allotment, ratings, products };
 
 export const databaseSync = async () => {
   try {

@@ -1,3 +1,4 @@
+/* eslint-disable import/no-extraneous-dependencies */
 import Joi from "joi";
 import { Request } from "express";
 import fs from "fs";
@@ -17,16 +18,54 @@ import { UserRepo, ReaderBioRepo } from "@repo";
 import Messages from "@messages";
 import { Jwt, uploadFile } from "@utils";
 import dotenv from "dotenv";
+import { errorMessage } from "@helper";
+import Stripe from "stripe";
 
 const NODE_ENV = process.env.NODE_ENV || "development";
 dotenv.config({ path: `.env.${NODE_ENV}` });
 
+const stripe = new Stripe(process.env.STRIPE_KEY as string, {
+  apiVersion: "2023-08-16",
+});
+
 class UserService {
   static async signUp(req: Request, data: UserInterface) {
-    ValidateFields.emailValidation(req, data.email);
-    ValidateFields.stringRequired(req, data.role, "Role");
+    const schema = Joi.string().email().required();
+    const validation = schema.validate(data.email);
+    if (validation.error) {
+      const message = errorMessage(
+        "Email",
+        validation.error.details[0].message,
+      );
+      if (req.file) {
+        fs.unlinkSync(req.file.path);
+      }
+      throw new BadRequestExceptionError(message);
+    }
+    const StringSchemachema = Joi.string().required();
+    const stringValidation = StringSchemachema.validate(data.role);
+    if (stringValidation.error) {
+      const message = errorMessage(
+        "Role",
+        stringValidation.error.details[0].message,
+      );
+      if (req.file) {
+        fs.unlinkSync(req.file.path);
+      }
+      throw new BadRequestExceptionError(message);
+    }
     const passwordSchema = Joi.string().min(8).max(30).required();
-    ValidateFields.passwordValidation(req, data.password, passwordSchema);
+    const passwordValidation = passwordSchema.validate(data.password);
+    if (passwordValidation.error) {
+      const message = errorMessage(
+        "Password",
+        passwordValidation.error.details[0].message,
+      );
+      if (req.file) {
+        fs.unlinkSync(req.file.path);
+      }
+      throw new BadRequestExceptionError(message);
+    }
     if (data.password !== data.confirmPassword) {
       if (req.file) {
         fs.unlinkSync(req.file.path);
@@ -55,6 +94,10 @@ class UserService {
       profilePicture,
       ...userData
     } = data;
+    const stripeCustomer = await stripe.customers.create({
+      email: mail,
+      name: `${data.firstName} ${data.lastName}`,
+    });
     if (req.file) {
       await uploadFile(req.file.path);
       fs.unlinkSync(req.file.path);
@@ -64,15 +107,16 @@ class UserService {
         password: hash,
         ...userData,
         profilePicture: profile,
+        stripeCustomerId: stripeCustomer.id,
       };
     } else {
       responseData = {
         email: mail,
         password: hash,
         ...userData,
+        stripeCustomerId: stripeCustomer.id,
       };
     }
-
     const createdUser = await UserRepo.createUser(responseData);
     if (data.role === "Reader") {
       await ReaderBioRepo.createReaderBio({ id: createdUser.dataValues.id });
@@ -86,10 +130,10 @@ class UserService {
     };
   }
 
-  static async logIn(req: Request, data: { email: string; password: string }) {
-    ValidateFields.emailValidation(req, data.email);
+  static async logIn(data: { email: string; password: string }) {
+    ValidateFields.emailValidation(data.email);
     const passwordSchema = Joi.string().required();
-    ValidateFields.passwordValidation(req, data.password, passwordSchema);
+    ValidateFields.passwordValidation(data.password, passwordSchema);
     const email = data.email.toLowerCase();
     const user = await UserRepo.findUser(email);
     if (!user) {
@@ -123,8 +167,8 @@ class UserService {
     return responseData;
   }
 
-  static async updateReaderProfile(req: Request, data: ReaderBioInterface) {
-    ValidateFields.stringRequired(req, data.bio, "Bio");
+  static async updateReaderProfile(data: ReaderBioInterface) {
+    ValidateFields.stringRequired(data.bio, "Bio");
     ValidateFields.arrayRequired(data.specialities, "Specialities");
     const user = await UserRepo.findUserByID(data.id);
     if (user?.dataValues.role !== "Reader") {

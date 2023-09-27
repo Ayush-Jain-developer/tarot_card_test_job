@@ -10,7 +10,7 @@ class RatingController {
     static async createRating(req, res, next) {
         const data = req.body;
         try {
-            const response = await _service_1.RatingService.createRating(req, data);
+            const response = await _service_1.RatingService.createRating(data);
             const message = _messages_1.default.userRating;
             return (0, _helper_1.apiResponse)(res, 200, message, response);
         }

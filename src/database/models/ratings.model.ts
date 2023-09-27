@@ -2,17 +2,7 @@ import { DataTypes, Model } from "sequelize";
 import { sequelize } from "@database/connection";
 import { RatingInterface } from "@interfaces";
 
-class Ratings extends Model<RatingInterface> implements RatingInterface {
-  id?: string | undefined;
-
-  senderId!: string;
-
-  receiverId!: string;
-
-  rating!: 1 | 2 | 3 | 4 | 5;
-
-  review?: string;
-}
+class Ratings extends Model<RatingInterface> {}
 Ratings.init(
   {
     id: {
