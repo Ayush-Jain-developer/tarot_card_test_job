@@ -22,7 +22,6 @@ class Jwt {
 
   static verifyToken(req: Request, res: Response, next: NextFunction) {
     const token = req.header("Authorization");
-
     if (!token) {
       throw new UnauthorizedExceptionError(Messages.tokenMissing);
     }
@@ -32,6 +31,7 @@ class Jwt {
         if (err.name === "TokenExpiredError") {
           return next(new UnauthorizedExceptionError(Messages.tokenExpired));
         }
+
         return next(new UnauthorizedExceptionError(Messages.invalidToken));
       }
       const result = decoded as jwt.JwtPayload;

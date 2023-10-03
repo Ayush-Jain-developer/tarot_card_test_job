@@ -1,5 +1,5 @@
 import express from "express";
-import UserController from "@controller";
+import { UserController } from "@controller";
 import { Jwt } from "@utils";
 import multerUpload from "utils/multer.utils";
 

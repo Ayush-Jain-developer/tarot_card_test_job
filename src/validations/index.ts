@@ -12,8 +12,13 @@ class ValidateFields {
     }
   }
 
-  static integerRequired(field: number, word: string) {
-    const schema = Joi.number().integer().min(1).max(5).required();
+  static integerRequired(
+    field: number,
+    word: string,
+    min: number,
+    max: number,
+  ) {
+    const schema = Joi.number().integer().min(min).max(max).required();
     const validation = schema.validate(field);
     if (validation.error) {
       const message = errorMessage(word, validation.error.details[0].message);

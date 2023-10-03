@@ -4,9 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "TS_NODE_BASEURL=./build/src node -r tsconfig-paths/register build/src/index.js",
-    "lint": "eslint src/ --ext .ts --fix && eslint test/ --ext .ts --fix",
-    "test": "jest ./build/test/"
+    "start": "TS_NODE_BASEURL=./build node -r tsconfig-paths/register build/index.js",
+    "lint": "eslint src/ --ext .ts --fix",
+    "test": "npx jest src/"
   },
   "keywords": [],
   "author": "",

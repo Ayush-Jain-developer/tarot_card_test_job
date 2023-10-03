@@ -53,6 +53,11 @@ class Messages {
     "Your rating has already been saved for the given user";
 
   static readonly serviceAdded = "New service added successfully";
+
+  static readonly noCards = "No cards saved for the given user";
+
+  static readonly userCards =
+    "Following are the Cards saved for the given user";
 }
 
 export default Messages;

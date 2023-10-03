@@ -16,17 +16,8 @@ import ValidateFields from "@validations";
 import bcrypt from "bcrypt";
 import { UserRepo, ReaderBioRepo } from "@repo";
 import Messages from "@messages";
-import { Jwt, uploadFile } from "@utils";
-import dotenv from "dotenv";
+import { Jwt, uploadFile, stripe } from "@utils";
 import { errorMessage } from "@helper";
-import Stripe from "stripe";
-
-const NODE_ENV = process.env.NODE_ENV || "development";
-dotenv.config({ path: `.env.${NODE_ENV}` });
-
-const stripe = new Stripe(process.env.STRIPE_KEY as string, {
-  apiVersion: "2023-08-16",
-});
 
 class UserService {
   static async signUp(req: Request, data: UserInterface) {
@@ -107,14 +98,14 @@ class UserService {
         password: hash,
         ...userData,
         profilePicture: profile,
-        stripeCustomerId: stripeCustomer.id,
+        stripeCusId: stripeCustomer.id,
       };
     } else {
       responseData = {
         email: mail,
         password: hash,
         ...userData,
-        stripeCustomerId: stripeCustomer.id,
+        stripeCusId: stripeCustomer.id,
       };
     }
     const createdUser = await UserRepo.createUser(responseData);
@@ -150,6 +141,7 @@ class UserService {
     const responseData: LoginResDataInterface = {
       id: user.dataValues.id,
       role: user.dataValues.role,
+      stripeCusId: user.dataValues.stripeCusId,
       accessToken: token.accessToken,
       refreshToken: token.refreshToken,
       refreshTokenExpiry: Messages.refreshTokenExpiry,

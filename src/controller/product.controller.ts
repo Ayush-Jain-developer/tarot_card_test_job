@@ -6,7 +6,7 @@ import { apiResponse } from "@helper";
 
 class ProductsController {
   static async createProduct(req: Request, res: Response, next: NextFunction) {
-    const data: ProductsInterface = req.body;
+    const data: ProductsInterface & { role: string } = req.body;
     try {
       const response = await ProductsService.createProduct(data);
       const message = Messages.serviceAdded;

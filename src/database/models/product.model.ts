@@ -1,13 +1,17 @@
-import { DataTypes } from "sequelize";
+import { DataTypes, Model } from "sequelize";
 import { sequelize } from "@database/connection";
-import User from "./user.model";
 
-class Products extends User {}
+class Products extends Model {}
 Products.init(
   {
     id: {
       type: DataTypes.UUID,
       primaryKey: true,
+      defaultValue: DataTypes.UUIDV4,
+    },
+    readerId: {
+      type: DataTypes.STRING,
+      allowNull: false,
     },
     name: {
       type: DataTypes.STRING,
@@ -20,7 +24,7 @@ Products.init(
     currency: {
       type: DataTypes.STRING,
       allowNull: false,
-      defaultValue: "USD",
+      defaultValue: "usd",
     },
   },
   {

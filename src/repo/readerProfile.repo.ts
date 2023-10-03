@@ -2,9 +2,7 @@ import { models } from "@database/models";
 import { ReaderBioInterface } from "@interfaces";
 
 class ReaderBioRepo {
-  static async createReaderBio(
-    data: Omit<ReaderBioInterface, "bio" | "specialities" | "availability">,
-  ) {
+  static async createReaderBio(data: Pick<ReaderBioInterface, "id">) {
     return models.readerBio.create(data);
   }
 

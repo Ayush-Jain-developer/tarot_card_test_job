@@ -31,7 +31,7 @@ User.init(
       type: DataTypes.ENUM("Reader", "Client"),
       allowNull: false,
     },
-    stripeCustomerId: {
+    stripeCusId: {
       type: DataTypes.STRING,
     },
   },

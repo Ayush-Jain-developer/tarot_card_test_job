@@ -14,7 +14,7 @@ class RatingService {
       throw new UnauthorizedExceptionError(Messages.invalidToken);
     }
     ValidateFields.stringRequired(data.receiverId, "Receiver ID");
-    ValidateFields.integerRequired(data.rating, "Rating");
+    ValidateFields.integerRequired(data.rating, "Rating", 1, 5);
     const rating = await RatingRepo.findRating(data.senderId, data.receiverId);
     if (rating?.dataValues) {
       throw new BadRequestExceptionError(Messages.ratingGiven);

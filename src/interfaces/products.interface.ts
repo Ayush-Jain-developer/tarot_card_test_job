@@ -1,8 +1,9 @@
 interface ProductsInterface {
   id?: string;
+  readerId: string;
   name: string;
   amount: number;
-  currency: string;
+  currency?: string;
 }
 
 export default ProductsInterface;
